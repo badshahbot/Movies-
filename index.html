@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fire Box TV</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #00BFFF; 
+            --primary-color-dark: #009ACD; 
+            --background-color: #101010;
+            --surface-color: #1e1e1e;
+            --text-primary: #ffffff;
+            --text-secondary: #aaaaaa;
+            --border-color: #333333;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--background-color); color: var(--text-primary); }
+        .container { padding: 0 15px; }
+
+        #initial-loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--background-color);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 10001;
+        }
+        .login-header { display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        .login-logo img { width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--primary-color); }
+        .login-title { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--primary-color); letter-spacing: 2px; }
+        
+        .top-header { background-color: var(--background-color); padding: 10px 15px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px; position: sticky; top: 0; z-index: 990; }
+        .logo-title { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+        .website-name { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--primary-color); letter-spacing: 1.5px; font-weight: 400; }
+        .logo img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--primary-color); }
+        .header-search { flex-grow: 1; }
+        .search-bar-mock { display: flex; align-items: center; gap: 8px; background-color: var(--surface-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 7px 10px; cursor: pointer; width: 100%; }
+        .search-bar-mock svg { width: 18px; height: 18px; fill: var(--text-secondary); }
+        .search-bar-mock span { color: var(--text-secondary); font-size: 14px; }
+        .main-nav { background-color: var(--background-color); border-bottom: 1px solid var(--border-color); overflow-x: auto; white-space: nowrap; }
+        .main-nav ul { list-style: none; display: flex; }
+        .main-nav a { padding: 12px 15px; display: block; color: white; text-decoration: none; font-weight: bold; font-size: 14px; cursor: pointer; }
+        main { padding-top: 15px; }
+        .slider-container { width: 100%; height: 30vh; max-height: 220px; position: relative; overflow: hidden; border-radius: 12px; margin-bottom: 20px; background-color: var(--surface-color); }
+        .slider-wrapper { display: flex; height: 100%; }
+        .slide { flex-shrink: 0; width: 100%; height: 100%; position: relative; background-size: cover; background-position: center; }
+        .slide::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to right, rgba(0,0,0,0.8) 20%, rgba(0,0,0,0.1) 80%); }
+        .slide-content { position: absolute; bottom: 20px; left: 20px; z-index: 2; color: white; max-width: 80%; }
+        .slide-title { font-size: 20px; font-weight: bold; margin-bottom: 8px; }
+        .slide-desc { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .slide-buttons { display: flex; gap: 10px; align-items: center; }
+        .watch-now-btn, .add-list-btn { padding: 8px 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; color: white; text-decoration: none; display: inline-block; }
+        .watch-now-btn { background: var(--primary-color); }
+        .add-list-btn { background: rgba(40, 40, 40, 0.8); border: 1px solid var(--text-secondary); }
+        .section-title { color: var(--primary-color); margin-bottom: 15px; font-size: 20px; }
+        .horizontal-scroll-container { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 25px; -ms-overflow-style: none; scrollbar-width: none; }
+        .horizontal-scroll-container::-webkit-scrollbar { display: none; }
+        .popular-item { flex-shrink: 0; width: 120px; cursor: pointer; }
+        .popular-poster { width: 100%; height: 160px; object-fit: cover; border-radius: 8px; margin-bottom: 8px; background-color: var(--surface-color); position: relative; }
+        .popular-title { font-size: 14px; font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .release-item { flex-shrink: 0; width: 160px; cursor: pointer; }
+        .release-poster { width: 100%; height: 90px; object-fit: cover; border-radius: 6px; margin-bottom: 8px; background-color: var(--surface-color); }
+        .release-title { font-size: 14px; font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .manga-list { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .list-item { background-color: var(--surface-color); border-radius: 8px; overflow: hidden; cursor: pointer; display: flex; flex-direction: column; }
+        .list-item-poster { width: 100%; position: relative; }
+        .list-item-poster img { width: 100%; height: auto; aspect-ratio: 2 / 3; object-fit: cover; display: block; background-color: #333; }
+        .language-tag { position: absolute; top: 6px; right: 6px; background-color: rgba(0, 0, 0, 0.7); color: white; padding: 3px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+        .list-item-info { padding: 8px; }
+        .list-item-title { font-size: 13px; font-weight: 500; color: var(--text-primary); line-height: 1.3; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        .list-item-meta { display: -webkit-box; font-size: 11px; color: var(--text-secondary); line-height: 1.4; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        #details-view { padding: 15px; }
+        .details-header { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        .details-header h1 { font-size: 22px; flex-grow: 1; }
+        .details-actions { display: flex; gap: 10px; }
+        .details-btn { padding: 10px 15px; border-radius: 5px; font-size: 14px; white-space: nowrap; text-decoration: none; color: white; border: none; cursor: pointer; }
+        .download-btn { background-color: var(--primary-color); }
+        .add-list-details-btn { background: rgba(40, 40, 40, 0.8); border: 1px solid var(--text-secondary); }
+        .details-poster { width: 150px; display: block; margin: 0 auto 20px; border-radius: 8px; }
+        .details-description { color: var(--text-secondary); line-height: 1.7; }
+        .back-link { display: inline-block; color: var(--primary-color); text-decoration: none; margin-bottom: 20px; font-weight: bold; }
+        #search-view { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background-color: var(--background-color); z-index: 1000; display: none; flex-direction: column; }
+        .search-page-header { display: flex; align-items: center; gap: 10px; padding: 10px 15px; background-color: var(--background-color); flex-shrink: 0; }
+        .search-page-header .back-btn { background: none; border: none; cursor: pointer; padding: 0; }
+        .search-page-header .back-btn svg { width: 32px; height: 32px; fill: var(--text-primary); }
+        .search-input-wrapper { flex-grow: 1; display: flex; align-items: center; background-color: var(--surface-color); border-radius: 8px; padding: 0 15px; }
+        .search-input-wrapper svg { width: 20px; height: 20px; fill: var(--text-secondary); margin-right: 10px;}
+        #search-page-input { width: 100%; padding: 10px 0; background: none; border: none; color: var(--text-primary); font-size: 16px; }
+        #search-page-input:focus { outline: none; }
+        .search-btn-text { background: none; border: none; color: var(--primary-color); font-size: 16px; font-weight: 600; cursor: pointer; padding-left: 5px; }
+        .search-content-wrapper { flex: 1; overflow-y: auto; padding: 15px; min-height: 0; }
+        #search-view .manga-list, #category-view .manga-list { grid-template-columns: 1fr; gap: 12px; }
+        #search-view .list-item, #category-view .list-item { flex-direction: row; align-items: center; padding: 10px; gap: 15px; overflow: visible; }
+        #search-view .list-item-poster, #category-view .list-item-poster { width: 80px; flex-shrink: 0; }
+        #search-view .list-item-poster img, #category-view .list-item-poster img { height: 110px; aspect-ratio: auto; border-radius: 8px; }
+        #search-view .list-item-info, #category-view .list-item-info { padding: 0; flex-grow: 1; }
+        #search-view .list-item-title, #category-view .list-item-title { white-space: normal; font-size: 16px; font-weight: 600; -webkit-line-clamp: 2; -webkit-box-orient: vertical; display: -webkit-box; overflow: hidden; margin-bottom: 8px; color: var(--text-primary); }
+        #search-view .list-item-meta, #category-view .list-item-meta { display: -webkit-box; color: var(--text-secondary); font-size: 13px; line-height: 1.5; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        #toast-notification { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: var(--primary-color); color: white; padding: 12px 20px; border-radius: 8px; z-index: 9999; opacity: 0; visibility: hidden; transition: opacity 0.4s, visibility 0.4s; font-size: 14px; font-weight: 500; }
+        #toast-notification.show { opacity: 1; visibility: visible; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); display: flex; justify-content: center; align-items: center; z-index: 1001; }
+        .modal-content { background-color: var(--surface-color); padding: 25px; border-radius: 12px; text-align: center; width: 80%; max-width: 300px; border: 1px solid var(--border-color); }
+        .modal-content p { font-size: 16px; margin-bottom: 20px; }
+        .modal-actions { display: flex; gap: 15px; justify-content: center; }
+        .modal-btn { padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; color: white; }
+        .modal-btn.delete { background-color: var(--primary-color); }
+        .modal-btn.back { background-color: #555; }
+        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); display: flex; justify-content: center; align-items: center; z-index: 10000; color: white; font-size: 24px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    
+    <div id="initial-loading-overlay">
+        <div class="login-header">
+            <div class="login-logo"><img src="https://files.catbox.moe/nj8tq6.jpg" alt="Logo"></div>
+            <h1 class="login-title">Fire Box TV</h1>
+        </div>
+    </div>
+
+    <div id="app-shell" style="display: none;">
+        <header class="top-header">
+            <div class="logo-title">
+                <a href="#" class="logo"><img src="https://files.catbox.moe/nj8tq6.jpg" alt="Logo"></a>
+                <h1 class="website-name">Fire box TV</h1>
+            </div>
+            <div class="header-search"><div class="search-bar-mock" onclick="showView('search-view')"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" /></svg><span>Search...</span></div></div>
+        </header>
+        <nav class="main-nav">
+            <ul>
+                <li><a onclick="showView('home-view')">Home</a></li>
+                <li><a onclick="showView('category-view')">All Movies</a></li>
+                <li><a onclick="showView('my-list-view')">My List</a></li>
+            </ul>
+        </nav>
+        <div id="app-content">
+            <main id="home-view" class="container"></main>
+            <main id="category-view" class="container" style="display: none;"></main>
+            <main id="my-list-view" class="container" style="display: none;"></main>
+            <main id="details-view" class="container" style="display: none;"></main>
+        </div>
+        <div id="search-view" style="display: none;">
+            <div class="search-page-header">
+                <button class="back-btn" onclick="goBack()"><svg viewBox="0 0 24 24"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" /></svg></button>
+                <div class="search-input-wrapper"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" /></svg><input type="text" id="search-page-input" placeholder="Search movies..." onkeyup="handleLiveSearch()"></div>
+                <button class="search-btn-text">Search</button>
+            </div>
+            <div class="search-content-wrapper"><section id="search-results-list" class="manga-list"></section></div>
+        </div>
+    </div>
+    
+    <div id="toast-notification"></div>
+
+    <div id="delete-confirmation-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <p>Do you want to remove this from your list?</p>
+            <div class="modal-actions">
+                <button id="modal-btn-delete" class="modal-btn delete">Delete</button>
+                <button id="modal-btn-back" class="modal-btn back">Back</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="loading-overlay" style="display: none;">Loading...</div>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, query, orderBy, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        
+        // --- NEW FIREBASE CONFIG ---
+        const firebaseConfig = {
+          apiKey: "AIzaSyBzNXcgWZEwn6B2sPJJzdRBasNXaNyb4Bs",
+          authDomain: "myweb-5c13a.firebaseapp.com",
+          databaseURL: "https://myweb-5c13a-default-rtdb.europe-west1.firebasedatabase.app",
+          projectId: "myweb-5c13a",
+          storageBucket: "myweb-5c13a.firebasestorage.app",
+          messagingSenderId: "566157637233",
+          appId: "1:566157637233:web:4511f16ab80d4f32620dd0",
+          measurementId: "G-N0W3F2EZVB"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        let allMoviesData = [], allBannersData = [], allUpdatesData = [], allPopularData = [];
+        let currentViewId = 'home-view', lastView = 'home-view';
+        let isAppInitialized = false;
+
+        async function fetchAndApplySiteConfig() {
+            try {
+                const configRef = doc(db, "siteConfig", "main");
+                const docSnap = await getDoc(configRef);
+
+                if (docSnap.exists()) {
+                    const config = docSnap.data();
+                    if (config.primaryColor) {
+                        document.documentElement.style.setProperty('--primary-color', config.primaryColor);
+                    }
+                    if (config.websiteName) {
+                        document.querySelectorAll('.website-name, .login-title').forEach(el => {
+                            el.textContent = config.websiteName;
+                        });
+                    }
+                    if (config.logoUrl) {
+                        document.querySelectorAll('.logo img, .login-logo img').forEach(el => {
+                            el.src = config.logoUrl;
+                        });
+                    }
+                    if (config.backgroundUrl) {
+                        document.body.style.backgroundImage = `url(${config.backgroundUrl})`;
+                        document.body.style.backgroundSize = 'cover';
+                        document.body.style.backgroundAttachment = 'fixed';
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching site config:", error);
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast-notification');
+            if (!toast) return;
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 2500);
+        }
+
+        function getMyList() { return JSON.parse(localStorage.getItem('firebox_mylist') || '[]'); }
+        function addToMyList(itemId) {
+            let list = getMyList();
+            if (!list.includes(itemId)) {
+                list.push(itemId);
+                localStorage.setItem('firebox_mylist', JSON.stringify(list));
+                showToast('Added to My List');
+            } else { showToast('Already in your list'); }
+        }
+        
+        function showLoadingAndRedirect(event, url) {
+            event.preventDefault(); event.stopPropagation();
+            const loadingOverlay = document.getElementById('loading-overlay');
+            if (loadingOverlay) loadingOverlay.style.display = 'flex';
+            setTimeout(() => {
+                window.open(url, '_blank');
+                setTimeout(() => { if (loadingOverlay) loadingOverlay.style.display = 'none'; }, 1000);
+            }, 50);
+        }
+
+        let clickTimer = null;
+        function handleMyListItemClick(event, itemId) {
+            if (clickTimer === null) {
+                clickTimer = setTimeout(() => { clickTimer = null; showDetailsPage(itemId, 'movie'); }, 300);
+            } else { clearTimeout(clickTimer); clickTimer = null; showDeleteConfirmation(itemId); }
+        }
+
+        function showDeleteConfirmation(itemId) {
+            const modal = document.getElementById('delete-confirmation-modal');
+            if (!modal) return;
+            document.getElementById('modal-btn-delete').onclick = () => deleteFromMyList(itemId);
+            document.getElementById('modal-btn-back').onclick = hideDeleteConfirmation;
+            modal.style.display = 'flex';
+        }
+
+        function hideDeleteConfirmation() {
+            const modal = document.getElementById('delete-confirmation-modal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function deleteFromMyList(itemId) {
+            let list = getMyList();
+            localStorage.setItem('firebox_mylist', JSON.stringify(list.filter(id => id !== itemId)));
+            hideDeleteConfirmation(); showToast('Removed from My List'); renderMyListPage();
+        }
+
+        function renderHomePage() {
+            const homeView = document.getElementById('home-view');
+            if (!homeView) return;
+            const createPopularCard = item => `<div class="popular-item" onclick="showDetailsPage('${item.id}', 'popular')"><div class="popular-poster"><img src="${item.imageUrl}" alt="${item.title}" style="width:100%; height:100%; object-fit:cover; border-radius: 8px;">${item.language ? `<span class="language-tag">${item.language}</span>` : ''}</div><h3 class="popular-title">${item.title}</h3></div>`;
+            const createReleaseCard = item => `<div class="release-item" onclick="showDetailsPage('${item.id}', 'update')"><img src="${item.imageUrl}" alt="${item.title}" class="release-poster"><h3 class="release-title">${item.title}</h3></div>`;
+            
+            const popularHTML = `<section><h2 class="section-title">Popular ❤️‍🩹</h2><div class="horizontal-scroll-container">${(allPopularData.length > 0 ? allPopularData : []).map(createPopularCard).join('')}</div></section>`;
+            const newReleasesHTML = `<section><h2 class="section-title">New Release 🎬</h2><div class="horizontal-scroll-container">${(allUpdatesData.length > 0 ? allUpdatesData : []).map(createReleaseCard).join('')}</div></section>`;
+            const sliderHTML = `<div class="slider-container"><div class="slider-wrapper">${(allBannersData.length > 0 ? allBannersData : []).map(createSlide).join('')}</div></div>`;
+            homeView.innerHTML = `${sliderHTML}${popularHTML}${newReleasesHTML}<h2 class="section-title">Latest Uploads</h2><section class="manga-list">${(allMoviesData.length > 0 ? allMoviesData : []).map(createDetailedListItem).join('')}</section>`;
+            if (allBannersData.length > 0) activateSlider();
+        }
+
+        function createSlide(item) { 
+            const watchNowButton = item.telegramLink ? `<a href="${item.telegramLink}" class="watch-now-btn" onclick="showLoadingAndRedirect(event, this.href)">Watch Now</a>` : '';
+            return `<div class="slide" style="background-image: url('${item.imageUrl}');" onclick="showDetailsPage('${item.id}', 'banner')"><div class="slide-content"><h2 class="slide-title">${item.title}</h2><p class="slide-desc">${item.description || ''}</p><div class="slide-buttons">${watchNowButton}<button class="add-list-btn" onclick="event.stopPropagation(); showView('my-list-view')">My List</button></div></div></div>`;
+        }
+        
+        function createDetailedListItem(item) {
+             return `<div class="list-item" onclick="showDetailsPage('${item.id}', 'movie')"><div class="list-item-poster"><img loading="lazy" src="${item.imageUrl}" alt="${item.title}">${item.language ? `<span class="language-tag">${item.language}</span>` : ''}</div><div class="list-item-info"><h3 class="list-item-title">${item.title}</h3><p class="list-item-meta">${item.description || ''}</p></div></div>`;
+        }
+        
+        function activateSlider() {
+            const container = document.querySelector('.slider-container');
+            if (!container || container.classList.contains('slider-active')) return;
+            const wrapper = container.querySelector('.slider-wrapper');
+            let slides = Array.from(wrapper.children);
+            if (slides.length <= 1) return;
+            let currentIndex = 1;
+            wrapper.appendChild(slides[0].cloneNode(true));
+            wrapper.prepend(slides[slides.length - 1].cloneNode(true));
+            const setPosition = () => wrapper.style.transform = `translateX(-${currentIndex * 100}%)`;
+            wrapper.style.transition = 'none'; setPosition();
+            const startAutoplay = () => {
+                setInterval(() => {
+                    currentIndex++;
+                    wrapper.style.transition = 'transform 0.7s ease-in-out';
+                    setPosition();
+                }, 5000);
+            };
+            wrapper.addEventListener('transitionend', () => {
+                slides = Array.from(wrapper.children);
+                if (currentIndex >= slides.length - 1) {
+                    wrapper.style.transition = 'none';
+                    currentIndex = 1;
+                    setPosition();
+                }
+                if (currentIndex <= 0) {
+                    wrapper.style.transition = 'none';
+                    currentIndex = slides.length - 2;
+                    setPosition();
+                }
+            });
+            startAutoplay();
+            container.classList.add('slider-active');
+        }
+        
+        function goBack() { showView(lastView); }
+
+        function showView(viewId) {
+            if (currentViewId !== viewId) { lastView = currentViewId; currentViewId = viewId; }
+            ['home-view', 'category-view', 'details-view', 'search-view', 'my-list-view'].forEach(id => {
+                const element = document.getElementById(id);
+                if(element) element.style.display = (id === viewId) ? (id === 'search-view' ? 'flex' : 'block') : 'none';
+            });
+            document.body.style.overflow = (viewId === 'search-view') ? 'hidden' : 'auto';
+            renderCurrentView(); window.scrollTo(0, 0);
+        }
+        
+        function showDetailsPage(itemId, type) {
+            const allData = [...allMoviesData, ...allBannersData, ...allUpdatesData, ...allPopularData];
+            const item = allData.find(m => m.id == itemId);
+            if (!item) return;
+            const addListButton = (type !== 'update' && type !== 'banner') ? `<button class="details-btn add-list-details-btn" onclick="addToMyList('${item.id}')">Add to List</button>` : '';
+            const watchNowButton = item.telegramLink ? `<a href="${item.telegramLink}" target="_blank" class="details-btn download-btn" onclick="showLoadingAndRedirect(event, this.href)">Watch Now</a>` : '';
+            document.getElementById('details-view').innerHTML = `<a href="#" onclick="event.preventDefault(); goBack()" class="back-link">‹ Back</a><div class="details-header"><h1>${item.title}</h1><div class="details-actions">${watchNowButton}${addListButton}</div></div><img src="${item.imageUrl}" alt="${item.title}" class="details-poster"><p class="details-description">${item.description || ''}</p>`;
+            showView('details-view');
+        }
+        
+        function handleLiveSearch() {
+            const searchTerm = document.getElementById('search-page-input').value.toLowerCase();
+            const sourceData = [...allMoviesData, ...allPopularData];
+            document.getElementById('search-results-list').innerHTML = sourceData.filter(item => item.title.toLowerCase().includes(searchTerm)).map(createDetailedListItem).join('');
+        }
+        
+        function createMyListItem(item) {
+            return `<div class="list-item" onclick="handleMyListItemClick(event, '${item.id}')"><div class="list-item-poster"><img loading="lazy" src="${item.imageUrl}" alt="${item.title}">${item.language ? `<span class="language-tag">${item.language}</span>` : ''}</div><div class="list-item-info"><h3 class="list-item-title">${item.title}</h3><p class="list-item-meta">${item.description || ''}</p></div></div>`;
+        }
+
+        function renderMyListPage() {
+            const myListView = document.getElementById('my-list-view');
+            if(!myListView) return;
+            const myListIds = getMyList();
+            if (myListIds.length === 0) { myListView.innerHTML = `<h2 class="section-title">My List</h2><p>Your list is empty.</p>`; return; }
+            const allData = [...allMoviesData, ...allBannersData, ...allUpdatesData, ...allPopularData];
+            const uniqueData = allData.filter((item, index, self) => index === self.findIndex(t => t.id === item.id));
+            const myListItems = myListIds.map(id => uniqueData.find(item => item.id === id)).filter(item => item);
+            myListView.innerHTML = `<h2 class="section-title">My List</h2><section class="manga-list">${myListItems.map(createMyListItem).join('')}</section>`;
+        }
+
+        function renderCurrentView() {
+            switch (currentViewId) {
+                case 'home-view': renderHomePage(); break;
+                case 'category-view': document.getElementById('category-view').innerHTML = `<h2 class="section-title">All Movies</h2><section class="manga-list">${(allMoviesData.length > 0 ? allMoviesData : []).map(createDetailedListItem).join('')}</section>`; break;
+                case 'my-list-view': renderMyListPage(); break;
+                case 'search-view': document.getElementById('search-page-input').value = ''; handleLiveSearch(); break;
+            }
+        }
+
+        function initializeAppContent() {
+            if (isAppInitialized) { renderCurrentView(); return; }
+            isAppInitialized = true;
+            
+            fetchAndApplySiteConfig();
+
+            const moviesQuery = query(collection(db, "movies"), orderBy("timestamp", "desc"));
+            onSnapshot(moviesQuery, (querySnapshot) => {
+                allMoviesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderCurrentView();
+            });
+
+            const bannersQuery = query(collection(db, "banners"), orderBy("timestamp", "desc"));
+            onSnapshot(bannersQuery, (querySnapshot) => {
+                allBannersData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderCurrentView();
+            });
+            
+            const updatesQuery = query(collection(db, "updates"), orderBy("timestamp", "desc"));
+            onSnapshot(updatesQuery, (querySnapshot) => {
+                allUpdatesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderCurrentView();
+            });
+            
+            const popularQuery = query(collection(db, "popular"), orderBy("timestamp", "desc"));
+            onSnapshot(popularQuery, (querySnapshot) => {
+                allPopularData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderCurrentView();
+            });
+        }
+        
+        function startApp() {
+            document.getElementById('initial-loading-overlay').style.display = 'none';
+            document.getElementById('app-shell').style.display = 'block';
+            initializeAppContent();
+        }
+        
+        startApp();
+
+        window.showView = showView; window.goBack = goBack; window.showDetailsPage = showDetailsPage;
+        window.handleLiveSearch = handleLiveSearch; window.showToast = showToast;
+        window.addToMyList = addToMyList; window.showDeleteConfirmation = showDeleteConfirmation;
+        window.handleMyListItemClick = handleMyListItemClick; window.showLoadingAndRedirect = showLoadingAndRedirect;
+    </script>
+</body>
+</html>

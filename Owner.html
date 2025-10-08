@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fire Box TV - ओनर पैनल</title>
+    <style>
+        :root { --primary: #00BFFF; --secondary: #222; --background: #141414; --text-primary: #fff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--background); color: var(--text-primary); }
+        .view { display: none; padding: 20px; padding-bottom: 100px; }
+        .view.active { display: block; }
+        .container { max-width: 1200px; margin: auto; }
+        
+        button, .bar-icon, .fab { 
+            cursor: pointer; 
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, transform 0.1s ease;
+        }
+        button:active, .fab:active {
+            transform: scale(0.96);
+        }
+
+        button { padding: 12px 20px; border: none; border-radius: 4px; font-weight: bold; font-size: 16px; }
+        .btn-primary { background-color: var(--primary); color: var(--text-primary); width: 100%; }
+        .btn-secondary { background-color: #444; color: var(--text-primary); margin-top: 10px; width: 100%; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        header h1 { font-size: 28px; color: var(--primary); }
+        .btn-back { font-size: 28px; background: none; border: none; color: var(--text-primary); padding-right: 15px; }
+        .list-section { background-color: var(--secondary); padding: 20px; border-radius: 8px; }
+        .list-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-radius: 4px; }
+        .list-item:nth-child(even) { background-color: #2a2a2a; }
+        .list-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; }
+        .list-item-actions button { background: none; border: none; color: #aaa; margin-left: 15px; padding: 5px; display: inline-flex; align-items: center; justify-content: center; }
+        .list-item-actions button svg { width: 20px; height: 20px; }
+        .list-item-actions button:hover { color: var(--primary); }
+        .list-item-details { display: flex; flex-direction: column; flex-grow: 1; overflow: hidden; padding-right: 10px; }
+        
+        .user-name { font-weight: bold; font-size: 16px; color: var(--text-primary); }
+        .user-email { font-size: 14px; color: #ccc; margin-top: 2px; }
+
+        #form-view, #popular-form-view, #logo-form-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--background); z-index: 1500; overflow-y: auto; }
+        #form-view .form-container, #popular-form-view .form-container, #logo-form-view .form-container { padding: 20px; padding-bottom: 80px; }
+        #form-view .form-header, #popular-form-view .form-header, #logo-form-view .form-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        #form-view h2, #popular-form-view h2, #logo-form-view h2 { font-size: 24px; }
+        #form-view .btn-close-form, #popular-form-view .btn-close-form, #logo-form-view .btn-close-form { font-size: 28px; background: none; border: none; color: var(--text-primary); }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal.active { display: flex; }
+        .modal-content { background: var(--secondary); padding: 25px; border-radius: 8px; width: 95%; max-width: 400px; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .close-btn { font-size: 28px; background: none; border: none; color: var(--text-primary); }
+        #add-choice-modal .choice-buttons { display: flex; flex-direction: column; gap: 15px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px; border-radius: 4px; border: 1px solid #444; background-color: #333; color: var(--text-primary); font-size: 16px; }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+        .bottom-action-bar { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--secondary); display: flex; justify-content: space-evenly; align-items: center; height: 60px; padding: 0 10px; box-shadow: 0 -2px 10px rgba(0,0,0,0.5); z-index: 500; }
+        .bar-icon { background: none; border: none; color: #aaa; display: flex; flex-direction: column; align-items: center; font-size: 12px; gap: 4px; flex-grow: 1; height: 100%; justify-content: center; }
+        .bar-icon.active { color: var(--primary); }
+        .bar-icon svg { width: 24px; height: 24px; }
+        .fab { width: 56px; height: 56px; border-radius: 50%; background-color: var(--primary); color: white; font-size: 28px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.4); position: fixed; bottom: 75px; left: 50%; transform: translateX(-50%); z-index: 501; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .color-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 15px; padding: 20px; }
+        .color-swatch { width: 100%; aspect-ratio: 1/1; border-radius: 50%; cursor: pointer; border: 2px solid #555; transition: transform 0.2s, box-shadow 0.2s; }
+        .color-swatch:hover { transform: scale(1.1); box-shadow: 0 0 10px var(--primary); }
+        #stats-display, #movie-stats, #banner-stats, #user-stats, #admin-stats, #popular-stats, #update-stats { font-size: 18px; color: #ccc; }
+        .search-container { margin-bottom: 20px; }
+        #movieSearchInput, #popularSearchInput, #bannerSearchInput, #updateSearchInput { width: 100%; padding: 12px; border-radius: 4px; border: 1px solid #444; background-color: #333; color: var(--text-primary); font-size: 16px; }
+
+        #toast-notification { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background-color: #333; color: white; padding: 12px 20px; border-radius: 8px; z-index: 9999; opacity: 0; visibility: hidden; transition: opacity 0.4s, visibility 0.4s, bottom 0.4s; font-size: 14px; font-weight: 500; border: 1px solid var(--primary); }
+        #toast-notification.show { opacity: 1; visibility: visible; bottom: 100px; }
+    </style>
+</head>
+<body>
+    <div id="banners-view" class="view active"><div class="container"><header><h1>Banners</h1><div id="banner-stats"></div></header><div class="search-container"><input type="text" id="bannerSearchInput" onkeyup="filterBanners()" placeholder="Search for banners..."></div><div class="list-section"><div id="banners-list"></div></div></div></div>
+    <div id="movies-view" class="view"><div class="container"><header><h1>Movies</h1><div id="movie-stats"></div></header><div class="search-container"><input type="text" id="movieSearchInput" onkeyup="filterMovies()" placeholder="Search for movies..."></div><div class="list-section"><div id="movies-list"></div></div></div></div>
+    <div id="updates-view" class="view"><div class="container"><header><h1>Updates</h1><div id="update-stats"></div></header><div class="search-container"><input type="text" id="updateSearchInput" onkeyup="filterUpdates()" placeholder="Search for updates..."></div><div class="list-section"><div id="updates-list"></div></div></div></div>
+    <div id="popular-view" class="view"><div class="container"><header><h1>Popular Cards</h1><div id="popular-stats"></div></header><div class="search-container"><input type="text" id="popularSearchInput" onkeyup="filterPopular()" placeholder="Search for popular cards..."></div><div class="list-section"><div id="popular-list"></div></div></div></div>
+
+    <div id="color-picker-view" class="view"><div class="container"><header><button class="btn-back" onclick="switchView(lastActiveView)">&lt;</button><h1>Change Website Color</h1><div></div></header><div class="color-grid" id="color-grid"></div></div></div>
+    <div id="background-form-view" class="view"><div class="container"><header><button class="btn-back" onclick="switchView(lastActiveView)">&lt;</button><h1>Change Background</h1><div></div></header><form id="background-form"><div class="form-group"><label for="backgroundUrlInput">Background Image URL</label><input type="url" id="backgroundUrlInput" placeholder="https://example.com/image.jpg"></div><button type="submit" class="btn-primary">Save Background</button><button type="button" class="btn-secondary" onclick="resetBackground()">Reset to Default</button></form></div></div>
+    <div id="logo-form-view" class="view"><div class="container"><header><button class="btn-back" onclick="switchView(lastActiveView)">&lt;</button><h1>Change Logo</h1><div></div></header><form id="logo-form"><div class="form-group"><label for="logoUrlInput">Logo Image URL</label><input type="url" id="logoUrlInput" placeholder="https://example.com/logo.png"></div><button type="submit" class="btn-primary">Save Logo</button><button type="button" class="btn-secondary" onclick="resetLogo()">Reset to Default</button></form></div></div>
+    
+    <div id="website-name-view" class="view"><div class="container"><header><button class="btn-back" onclick="switchView(lastActiveView)">&lt;</button><h1>Change Website Name</h1><div></div></header><form id="website-name-form"><div class="form-group"><label for="websiteNameInput">Website Name</label><input type="text" id="websiteNameInput" placeholder="Enter new name" required></div><button type="submit" class="btn-primary">Save Change</button><button type="button" class="btn-secondary" onclick="resetWebsiteName()">Reset to Default</button></form></div></div>
+    
+    <div id="form-view" class="view"><div class="form-container container"><div class="form-header"><h2 id="form-title"></h2><button class="btn-close-form" onclick="switchView(lastActiveView)">×</button></div><form id="main-form"><input type="hidden" id="docId"><input type="hidden" id="collectionName"><div class="form-group" data-field="title"><label for="title">Title</label><input type="text" id="title" required></div><div class="form-group" data-field="imageUrl"><label for="imageUrl">Image URL</label><input type="url" id="imageUrl" required></div><div class="form-group" data-field="description"><label for="description">Description</label><textarea id="description"></textarea></div><div class="form-group" data-field="language"><label for="language">Language</label><input type="text" id="language"></div><div class="form-group" data-field="telegramLink"><label for="telegramLink">Telegram Channel Link</label><input type="url" id="telegramLink"></div><button type="submit" class="btn-primary" style="margin-top: 20px;">Save</button></form></div></div>
+    
+    <div id="popular-form-view" class="view">
+        <div class="form-container container">
+            <div class="form-header">
+                <h2 id="popular-form-title">Add Popular Card</h2>
+                <button class="btn-close-form" onclick="switchView('popular-view')">×</button>
+            </div>
+            <form id="popular-form">
+                <input type="hidden" id="popular-docId">
+                <div class="form-group"><label for="popular-title">Title</label><input type="text" id="popular-title" required></div>
+                <div class="form-group"><label for="popular-imageUrl">Image URL</label><input type="url" id="popular-imageUrl" required></div>
+                <div class="form-group"><label for="popular-description">Description</label><textarea id="popular-description"></textarea></div>
+                <div class="form-group"><label for="popular-language">Language</label><input type="text" id="popular-language"></div>
+                <div class="form-group"><label for="popular-telegramLink">Telegram Channel Link</label><input type="url" id="popular-telegramLink"></div>
+                <button type="submit" class="btn-primary" style="margin-top: 20px;">Save Popular Card</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="add-choice-modal" class="modal"><div class="modal-content"><div class="modal-header"><h2>Options</h2><button class="close-btn" onclick="hideAddChoice()">×</button></div><div class="choice-buttons"><button class="btn-primary" onclick="openForm('banners', 'add')">Add Banner</button><button class="btn-primary" onclick="openForm('movies', 'add')">Add Movie</button><button class="btn-primary" onclick="openForm('updates', 'add')">Add Update</button><button class="btn-primary" onclick="openPopularForm('add')">Add Popular Card</button><hr>
+    <button class="btn-secondary" onclick="showNameChangeForm()">Change Website Name</button><button class="btn-secondary" onclick="showColorPicker()">Change Website Color</button><button class="btn-secondary" onclick="showBackgroundForm()">Change Background</button><button class="btn-secondary" onclick="showLogoForm()">Change Logo</button></div></div></div>
+
+    <nav class="bottom-action-bar"><button id="nav-banners" class="bar-icon active" onclick="switchView('banners-view')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg><span>Banners</span></button><button id="nav-movies" class="bar-icon" onclick="switchView('movies-view')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg><span>Movies</span></button><button class="fab" onclick="showAddChoice()">+</button><button id="nav-updates" class="bar-icon" onclick="switchView('updates-view')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12h2.5"/><path d="M19.5 7.5c-1.342-2.13-3.42-3.5-5.5-3.5-3.038 0-6.5 2.462-6.5 5.5s3.462 6.5 6.5 6.5c2.08 0 4.158-1.37 5.5-3.5"/><path d="M12.5 8H12v6h6"/></svg><span>Updates</span></button><button id="nav-popular" class="bar-icon" onclick="switchView('popular-view')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg><span>Popular</span></button></nav>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script>
+        // --- NEW FIREBASE CONFIG ---
+        const firebaseConfig = {
+          apiKey: "AIzaSyBzNXcgWZEwn6B2sPJJzdRBasNXaNyb4Bs",
+          authDomain: "myweb-5c13a.firebaseapp.com",
+          databaseURL: "https://myweb-5c13a-default-rtdb.europe-west1.firebasedatabase.app",
+          projectId: "myweb-5c13a",
+          storageBucket: "myweb-5c13a.firebasestorage.app",
+          messagingSenderId: "566157637233",
+          appId: "1:566157637233:web:4511f16ab80d4f32620dd0",
+          measurementId: "G-N0W3F2EZVB"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const mainForm = document.getElementById('main-form');
+        const popularForm = document.getElementById('popular-form');
+        const logoForm = document.getElementById('logo-form');
+        let lastActiveView = 'banners-view';
+
+        function switchView(viewId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            
+            const mainViews = ['banners-view', 'movies-view', 'updates-view', 'popular-view'];
+            if (mainViews.includes(viewId)) {
+                lastActiveView = viewId;
+            }
+            
+            document.querySelectorAll('.bar-icon').forEach(i => i.classList.remove('active'));
+            const navIconId = `nav-${lastActiveView.split('-')[0]}`;
+            if (document.getElementById(navIconId)) {
+                 document.getElementById(navIconId).classList.add('active');
+            }
+        }
+        
+        const collectionFields = {
+            'banners': ['title', 'imageUrl', 'description', 'telegramLink'],
+            'movies': ['title', 'imageUrl', 'description', 'language', 'telegramLink'],
+            'updates': ['title', 'imageUrl', 'description']
+        };
+
+        async function openForm(collection, mode = 'add', docId = null) {
+            hideAddChoice(); 
+            mainForm.reset();
+            document.getElementById('docId').value = docId;
+            document.getElementById('collectionName').value = collection;
+
+            const collectionNameSingular = collection.endsWith('s') ? collection.slice(0, -1) : collection;
+            const formTitle = `${mode === 'edit' ? 'Edit' : 'Add'} ${collectionNameSingular.charAt(0).toUpperCase() + collectionNameSingular.slice(1)}`;
+            document.getElementById('form-title').innerText = formTitle;
+            
+            const visibleFields = collectionFields[collection] || [];
+            document.querySelectorAll('#main-form .form-group').forEach(group => {
+                group.style.display = visibleFields.includes(group.dataset.field) ? 'block' : 'none';
+            });
+            
+            switchView('form-view');
+
+            if (mode === 'edit' && docId) {
+                try {
+                    const doc = await db.collection(collection).doc(docId).get();
+                    if (doc.exists) {
+                        const data = doc.data();
+                        visibleFields.forEach(field => {
+                            const input = document.getElementById(field);
+                            if(input) input.value = data[field] || '';
+                        });
+                    } else {
+                        alert("Error: Document not found.");
+                    }
+                } catch (err) {
+                    alert("Could not load item data. Check Firestore rules.");
+                    console.error("Error fetching document:", err);
+                }
+            }
+        }
+
+        mainForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const collection = document.getElementById('collectionName').value;
+            const docId = document.getElementById('docId').value;
+            
+            const data = { timestamp: firebase.firestore.FieldValue.serverTimestamp() };
+            const fields = collectionFields[collection] || [];
+            fields.forEach(field => {
+                const input = document.getElementById(field);
+                if(input) data[field] = input.value;
+            });
+
+            try {
+                if (docId) { 
+                    await db.collection(collection).doc(docId).set(data, { merge: true }); 
+                    showToast('Update successful!');
+                } else { 
+                    await db.collection(collection).add(data); 
+                    showToast('Item added successfully!');
+                }
+                switchView(lastActiveView);
+                fetchAllData();
+            } catch (err) { 
+                alert("Could not save data. Check Firestore rules. Error: " + err.message); 
+            }
+        });
+
+        async function openPopularForm(mode = 'add', docId = null) {
+            hideAddChoice();
+            popularForm.reset();
+            document.getElementById('popular-docId').value = docId || '';
+
+            if (mode === 'add') {
+                document.getElementById('popular-form-title').innerText = 'Add Popular Card';
+            } else {
+                document.getElementById('popular-form-title').innerText = 'Edit Popular Card';
+            }
+            
+            switchView('popular-form-view');
+
+            if (mode === 'edit' && docId) {
+                try {
+                    const doc = await db.collection('popular').doc(docId).get();
+                    if (doc.exists) {
+                        const data = doc.data();
+                        document.getElementById('popular-title').value = data.title || '';
+                        document.getElementById('popular-imageUrl').value = data.imageUrl || '';
+                        document.getElementById('popular-description').value = data.description || '';
+                        document.getElementById('popular-language').value = data.language || '';
+                        document.getElementById('popular-telegramLink').value = data.telegramLink || '';
+                    } else {
+                         alert("Error: Document not found.");
+                    }
+                } catch (err) {
+                    alert("Could not load item data. Check Firestore rules.");
+                    console.error("Error fetching popular doc:", err);
+                }
+            }
+        }
+
+        popularForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const docId = document.getElementById('popular-docId').value;
+            const data = {
+                title: document.getElementById('popular-title').value,
+                imageUrl: document.getElementById('popular-imageUrl').value,
+                description: document.getElementById('popular-description').value,
+                language: document.getElementById('popular-language').value,
+                telegramLink: document.getElementById('popular-telegramLink').value,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            try {
+                if (docId) {
+                    await db.collection('popular').doc(docId).set(data, { merge: true });
+                } else {
+                    await db.collection('popular').add(data);
+                }
+                showToast('Popular Card saved successfully!');
+                switchView('popular-view');
+                fetchPopularData();
+            } catch (err) {
+                alert('Error saving data. Check Firestore rules. Error: ' + err.message);
+            }
+        });
+
+        function showAddChoice() { document.getElementById('add-choice-modal').classList.add('active'); }
+        function hideAddChoice() { document.getElementById('add-choice-modal').classList.remove('active'); }
+        
+        const colors = [ "#00BFFF", "#E50914", "#F44336", "#E91E63", "#9C27B0", "#673AB7", "#3F51B5", "#2196F3", "#00BCD4", "#009688", "#4CAF50", "#FFC107", "#FF9800", "#FF5722", "#795548", "#607D8B", "#FFFFFF" ];
+        const colorGrid = document.getElementById('color-grid');
+        colors.forEach(color => {
+            const swatch = document.createElement('div'); swatch.className = 'color-swatch'; swatch.style.backgroundColor = color; swatch.onclick = () => selectColor(color); colorGrid.appendChild(swatch);
+        });
+
+        async function showNameChangeForm() { hideAddChoice(); try { const doc = await db.collection('siteConfig').doc('main').get(); if (doc.exists && doc.data().websiteName) { document.getElementById('websiteNameInput').value = doc.data().websiteName; } else { document.getElementById('websiteNameInput').value = 'Fire Box TV'; } } catch (err) { console.error("Error fetching website name:", err); } switchView('website-name-view'); }
+        document.getElementById('website-name-form').addEventListener('submit', async (e) => { e.preventDefault(); const newName = document.getElementById('websiteNameInput').value.trim(); if (!newName) { return; } try { await db.collection('siteConfig').doc('main').set({ websiteName: newName }, { merge: true }); showToast('Website name updated!'); switchView(lastActiveView); } catch (err) { alert('Error updating name: ' + err.message); } });
+        async function resetWebsiteName() { if (confirm("Are you sure you want to reset the name to 'Fire Box TV'?")) { try { await db.collection('siteConfig').doc('main').set({ websiteName: "Fire Box TV" }, { merge: true }); document.getElementById('websiteNameInput').value = "Fire Box TV"; showToast('Website name has been reset.'); switchView(lastActiveView); } catch (err) { alert('Error resetting name: ' + err.message); } } }
+        
+        function showColorPicker() { hideAddChoice(); switchView('color-picker-view'); }
+        async function selectColor(hexCode) { 
+            applyThemeColor(hexCode); 
+            showToast('Change Successful!');
+            await db.collection('siteConfig').doc('main').set({ primaryColor: hexCode }, { merge: true });
+        }
+        
+        async function showBackgroundForm() { hideAddChoice(); try { const doc = await db.collection('siteConfig').doc('main').get(); if (doc.exists) { document.getElementById('backgroundUrlInput').value = doc.data().backgroundUrl || ''; } } catch (err) { console.error("Error fetching background URL:", err); } switchView('background-form-view'); }
+        document.getElementById('background-form').addEventListener('submit', async (e) => { e.preventDefault(); const url = document.getElementById('backgroundUrlInput').value; try { await db.collection('siteConfig').doc('main').set({ backgroundUrl: url }, { merge: true }); showToast('Background updated successfully!'); switchView(lastActiveView); } catch (err) { alert('Error updating background: ' + err.message); } });
+        async function resetBackground() { if (confirm("Are you sure you want to reset the background?")) { try { await db.collection('siteConfig').doc('main').set({ backgroundUrl: "" }, { merge: true }); document.getElementById('backgroundUrlInput').value = ""; showToast('Background has been reset.'); switchView(lastActiveView); } catch (err) { alert('Error resetting background: ' + err.message); } } }
+        
+        async function showLogoForm() { hideAddChoice(); try { const doc = await db.collection('siteConfig').doc('main').get(); if (doc.exists) { document.getElementById('logoUrlInput').value = doc.data().logoUrl || ''; } } catch (err) { console.error("Error fetching logo URL:", err); } switchView('logo-form-view'); }
+        logoForm.addEventListener('submit', async (e) => { e.preventDefault(); const url = document.getElementById('logoUrlInput').value; try { await db.collection('siteConfig').doc('main').set({ logoUrl: url }, { merge: true }); showToast('Logo updated successfully!'); switchView(lastActiveView); } catch (err) { alert('Error updating logo: ' + err.message); } });
+        async function resetLogo() { if (confirm("Are you sure you want to reset the logo?")) { try { await db.collection('siteConfig').doc('main').set({ logoUrl: "" }, { merge: true }); document.getElementById('logoUrlInput').value = ""; showToast('Logo has been reset.'); switchView(lastActiveView); } catch (err) { alert('Error resetting logo: ' + err.message); } } }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast-notification');
+            if (!toast) return;
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 2500);
+        }
+
+        function applyThemeColor(hexCode) { if (hexCode) document.documentElement.style.setProperty('--primary', hexCode); }
+        async function fetchSiteConfig() { try { const doc = await db.collection('siteConfig').doc('main').get(); if (doc.exists) { applyThemeColor(doc.data().primaryColor); } } catch (err) { console.error("Error fetching site config:", err); } }
+        
+        function filterGeneric(inputId, listId) {
+            const filter = document.getElementById(inputId).value.toLowerCase();
+            const items = document.getElementById(listId).getElementsByClassName('list-item');
+            Array.from(items).forEach(item => {
+                const txtValue = item.querySelector("span").textContent || item.querySelector("span").innerText;
+                item.style.display = txtValue.toLowerCase().indexOf(filter) > -1 ? "flex" : "none";
+            });
+        }
+        function filterMovies() { filterGeneric('movieSearchInput', 'movies-list'); }
+        function filterPopular() { filterGeneric('popularSearchInput', 'popular-list'); }
+        function filterBanners() { filterGeneric('bannerSearchInput', 'banners-list'); }
+        function filterUpdates() { filterGeneric('updateSearchInput', 'updates-list'); }
+
+        async function fetchCollectionData(collectionName, editAction) {
+            const listEl = document.getElementById(`${collectionName}-list`);
+            const statsEl = document.getElementById(`${collectionName}-stats`) || document.getElementById(`${collectionName.slice(0,-1)}-stats`);
+            let query = db.collection(collectionName).orderBy("timestamp", "desc");
+            try {
+                const snapshot = await query.get();
+                if (statsEl) { statsEl.innerHTML = `Total: ${snapshot.size}`; }
+                listEl.innerHTML = snapshot.empty ? `<p>No data found.</p>` : snapshot.docs.map(doc => {
+                    const d = doc.data(); const displayName = d.title || 'No Title';
+                    return `<div class="list-item"><span>${displayName}</span><div class="list-item-actions"><button title="Edit" onclick="${editAction}('${collectionName}', 'edit', '${doc.id}')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button><button title="Delete" onclick="deleteDoc('${collectionName}', '${doc.id}', '${displayName.replace(/'/g, "\\'")}')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div></div>`;
+                }).join('');
+            } catch (e) { console.error(e); listEl.innerHTML = `<p>Error loading data.</p>`; }
+        }
+
+        function fetchPopularData() { fetchCollectionData('popular', 'openPopularForm'); }
+
+        async function deleteDoc(collection, docId, title) { if (confirm(`Delete "${title}"?`)) { await db.collection(collection).doc(docId).delete(); showToast('Successfully Deleted!'); fetchAllData(); } }
+        
+        function fetchAllData() { 
+            fetchSiteConfig(); 
+            fetchCollectionData('banners', 'openForm'); 
+            fetchCollectionData('movies', 'openForm');
+            fetchCollectionData('updates', 'openForm');
+            fetchPopularData();
+        }
+        
+        window.switchView = switchView; window.openForm = openForm;
+        window.deleteDoc = deleteDoc; 
+        window.filterMovies = filterMovies; window.filterPopular = filterPopular; window.filterBanners = filterBanners; window.filterUpdates = filterUpdates;
+        window.showAddChoice = showAddChoice; window.hideAddChoice = hideAddChoice; 
+        
+        window.showNameChangeForm = showNameChangeForm; window.resetWebsiteName = resetWebsiteName;
+        window.showColorPicker = showColorPicker; window.selectColor = selectColor;
+        window.showBackgroundForm = showBackgroundForm; window.resetBackground = resetBackground;
+        window.showLogoForm = showLogoForm; window.resetLogo = resetLogo;
+        window.openPopularForm = openPopularForm;
+
+        fetchAllData();
+    </script>
+</body>
+</html>
