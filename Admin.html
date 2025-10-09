@@ -39,7 +39,8 @@
         
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 8px; font-weight: bold; }
-        .form-group input, .form-group textarea { width: 100%; padding: 12px; border-radius: 4px; border: 1px solid #444; background-color: #333; color: var(--text-primary); font-size: 16px; }
+        /* --- CSS UPDATED TO INCLUDE SELECT STYLING --- */
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px; border-radius: 4px; border: 1px solid #444; background-color: #333; color: var(--text-primary); font-size: 16px; }
         .form-group textarea { resize: vertical; min-height: 100px; }
 
         #toast-notification { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: #333; color: white; padding: 12px 20px; border-radius: 8px; z-index: 9999; opacity: 0; visibility: hidden; transition: opacity 0.4s, visibility 0.4s, bottom 0.4s; font-size: 14px; font-weight: 500; border: 1px solid var(--primary); }
@@ -76,6 +77,17 @@
                 <div class="form-group"><label for="imageUrl">Image URL</label><input type="url" id="imageUrl" required></div>
                 <div class="form-group"><label for="description">Description</label><textarea id="description"></textarea></div>
                 <div class="form-group"><label for="language">Language</label><input type="text" id="language"></div>
+                
+                <!-- === CATEGORY SECTION ADDED HERE === -->
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select id="category">
+                        <option value="">None</option>
+                        <option value="Bollywood">Bollywood</option>
+                        <option value="Hollywood">Hollywood</option>
+                    </select>
+                </div>
+
                 <div class="form-group"><label for="telegramLink">Telegram Channel Link</label><input type="url" id="telegramLink"></div>
                 <button type="submit" class="btn-primary" style="margin-top: 20px;">Save Movie</button>
             </form>
@@ -172,6 +184,8 @@
                         document.getElementById('description').value = movie.description || '';
                         document.getElementById('language').value = movie.language || '';
                         document.getElementById('telegramLink').value = movie.telegramLink || '';
+                        // --- JAVASCRIPT UPDATED TO POPULATE CATEGORY ---
+                        document.getElementById('category').value = movie.category || '';
                     } else {
                         alert("Movie not found!");
                         return;
@@ -190,11 +204,13 @@
             e.preventDefault();
             const docId = document.getElementById('docId').value;
             
+            // --- JAVASCRIPT UPDATED TO SAVE CATEGORY ---
             const data = {
                 title: document.getElementById('title').value,
                 imageUrl: document.getElementById('imageUrl').value,
                 description: document.getElementById('description').value,
                 language: document.getElementById('language').value,
+                category: document.getElementById('category').value, // Get category value
                 telegramLink: document.getElementById('telegramLink').value,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
@@ -224,4 +240,4 @@
         fetchMovies();
     </script>
 </body>
-</html>
+    </html>
