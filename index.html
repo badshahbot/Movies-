@@ -7,6 +7,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+    
+    <!-- Slider Library (Swiper.js) Added for Swipe and Autoplay -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
     <style>
         :root {
             --primary-color: #00BFFF; 
@@ -43,8 +48,9 @@
         .main-nav ul { list-style: none; display: flex; }
         .main-nav a { padding: 12px 15px; display: block; color: white; text-decoration: none; font-weight: bold; font-size: 14px; cursor: pointer; }
         main { padding-top: 15px; }
-        .slider-container { width: 100%; height: 30vh; max-height: 220px; position: relative; overflow: hidden; border-radius: 12px; margin-bottom: 20px; background-color: var(--surface-color); }
-        .slider-wrapper { display: flex; height: 100%; }
+
+        /* --- Slider Styles Updated for Swiper.js --- */
+        .slider-container { width: 100%; height: 30vh; max-height: 220px; position: relative; border-radius: 12px; margin-bottom: 20px; background-color: var(--surface-color); }
         .slide { flex-shrink: 0; width: 100%; height: 100%; position: relative; background-size: cover; background-position: center; }
         .slide::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to right, rgba(0,0,0,0.8) 20%, rgba(0,0,0,0.1) 80%); }
         .slide-content { position: absolute; bottom: 20px; left: 20px; z-index: 2; color: white; max-width: 80%; }
@@ -127,17 +133,27 @@
             </div>
             <div class="header-search"><div class="search-bar-mock" onclick="showView('search-view')"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" /></svg><span>Search...</span></div></div>
         </header>
+        
+        <!-- === NAVIGATION BAR UPDATED === -->
         <nav class="main-nav">
             <ul>
                 <li><a onclick="showView('home-view')">Home</a></li>
                 <li><a onclick="showView('category-view')">All Movies</a></li>
                 <li><a onclick="showView('my-list-view')">My List</a></li>
+                <li><a onclick="showView('bollywood-view')">Bollywood</a></li>
+                <li><a onclick="showView('hollywood-view')">Hollywood</a></li>
             </ul>
         </nav>
+
         <div id="app-content">
             <main id="home-view" class="container"></main>
             <main id="category-view" class="container" style="display: none;"></main>
             <main id="my-list-view" class="container" style="display: none;"></main>
+            
+            <!-- === NEW PAGES (VIEWS) ADDED === -->
+            <main id="bollywood-view" class="container" style="display: none;"></main>
+            <main id="hollywood-view" class="container" style="display: none;"></main>
+
             <main id="details-view" class="container" style="display: none;"></main>
         </div>
         <div id="search-view" style="display: none;">
@@ -165,11 +181,9 @@
     <div id="loading-overlay" style="display: none;">Loading...</div>
 
     <script type="module">
-        // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getFirestore, collection, onSnapshot, query, orderBy, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
         
-        // --- NEW FIREBASE CONFIG ---
         const firebaseConfig = {
           apiKey: "AIzaSyBzNXcgWZEwn6B2sPJJzdRBasNXaNyb4Bs",
           authDomain: "myweb-5c13a.firebaseapp.com",
@@ -181,7 +195,6 @@
           measurementId: "G-N0W3F2EZVB"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
@@ -196,28 +209,16 @@
 
                 if (docSnap.exists()) {
                     const config = docSnap.data();
-                    if (config.primaryColor) {
-                        document.documentElement.style.setProperty('--primary-color', config.primaryColor);
-                    }
-                    if (config.websiteName) {
-                        document.querySelectorAll('.website-name, .login-title').forEach(el => {
-                            el.textContent = config.websiteName;
-                        });
-                    }
-                    if (config.logoUrl) {
-                        document.querySelectorAll('.logo img, .login-logo img').forEach(el => {
-                            el.src = config.logoUrl;
-                        });
-                    }
+                    if (config.primaryColor) document.documentElement.style.setProperty('--primary-color', config.primaryColor);
+                    if (config.websiteName) document.querySelectorAll('.website-name, .login-title').forEach(el => el.textContent = config.websiteName);
+                    if (config.logoUrl) document.querySelectorAll('.logo img, .login-logo img').forEach(el => el.src = config.logoUrl);
                     if (config.backgroundUrl) {
                         document.body.style.backgroundImage = `url(${config.backgroundUrl})`;
                         document.body.style.backgroundSize = 'cover';
                         document.body.style.backgroundAttachment = 'fixed';
                     }
                 }
-            } catch (error) {
-                console.error("Error fetching site config:", error);
-            }
+            } catch (error) { console.error("Error fetching site config:", error); }
         }
 
         function showToast(message) {
@@ -280,54 +281,41 @@
             const createPopularCard = item => `<div class="popular-item" onclick="showDetailsPage('${item.id}', 'popular')"><div class="popular-poster"><img src="${item.imageUrl}" alt="${item.title}" style="width:100%; height:100%; object-fit:cover; border-radius: 8px;">${item.language ? `<span class="language-tag">${item.language}</span>` : ''}</div><h3 class="popular-title">${item.title}</h3></div>`;
             const createReleaseCard = item => `<div class="release-item" onclick="showDetailsPage('${item.id}', 'update')"><img src="${item.imageUrl}" alt="${item.title}" class="release-poster"><h3 class="release-title">${item.title}</h3></div>`;
             
-            const popularHTML = `<section><h2 class="section-title">Popular ❤️‍🩹</h2><div class="horizontal-scroll-container">${(allPopularData.length > 0 ? allPopularData : []).map(createPopularCard).join('')}</div></section>`;
-            const newReleasesHTML = `<section><h2 class="section-title">New Release 🎬</h2><div class="horizontal-scroll-container">${(allUpdatesData.length > 0 ? allUpdatesData : []).map(createReleaseCard).join('')}</div></section>`;
-            const sliderHTML = `<div class="slider-container"><div class="slider-wrapper">${(allBannersData.length > 0 ? allBannersData : []).map(createSlide).join('')}</div></div>`;
+            const popularHTML = `<section><h2 class="section-title">Popular 🔥</h2><div class="horizontal-scroll-container">${(allPopularData.length > 0 ? allPopularData : []).map(createPopularCard).join('')}</div></section>`;
+            const newReleasesHTML = `<section><h2 class="section-title">New Release 🚀</h2><div class="horizontal-scroll-container">${(allUpdatesData.length > 0 ? allUpdatesData : []).map(createReleaseCard).join('')}</div></section>`;
+            
+            // === Slider HTML Updated for Swiper.js ===
+            const sliderHTML = `<div class="slider-container swiper"><div class="swiper-wrapper">${(allBannersData.length > 0 ? allBannersData : []).map(createSlide).join('')}</div></div>`;
             homeView.innerHTML = `${sliderHTML}${popularHTML}${newReleasesHTML}<h2 class="section-title">Latest Uploads</h2><section class="manga-list">${(allMoviesData.length > 0 ? allMoviesData : []).map(createDetailedListItem).join('')}</section>`;
             if (allBannersData.length > 0) activateSlider();
         }
 
         function createSlide(item) { 
             const watchNowButton = item.telegramLink ? `<a href="${item.telegramLink}" class="watch-now-btn" onclick="showLoadingAndRedirect(event, this.href)">Watch Now</a>` : '';
-            return `<div class="slide" style="background-image: url('${item.imageUrl}');" onclick="showDetailsPage('${item.id}', 'banner')"><div class="slide-content"><h2 class="slide-title">${item.title}</h2><p class="slide-desc">${item.description || ''}</p><div class="slide-buttons">${watchNowButton}<button class="add-list-btn" onclick="event.stopPropagation(); showView('my-list-view')">My List</button></div></div></div>`;
+            return `<div class="swiper-slide slide" style="background-image: url('${item.imageUrl}');" onclick="showDetailsPage('${item.id}', 'banner')"><div class="slide-content"><h2 class="slide-title">${item.title}</h2><p class="slide-desc">${item.description || ''}</p><div class="slide-buttons">${watchNowButton}<button class="add-list-btn" onclick="event.stopPropagation(); showView('my-list-view')">My List</button></div></div></div>`;
         }
         
         function createDetailedListItem(item) {
              return `<div class="list-item" onclick="showDetailsPage('${item.id}', 'movie')"><div class="list-item-poster"><img loading="lazy" src="${item.imageUrl}" alt="${item.title}">${item.language ? `<span class="language-tag">${item.language}</span>` : ''}</div><div class="list-item-info"><h3 class="list-item-title">${item.title}</h3><p class="list-item-meta">${item.description || ''}</p></div></div>`;
         }
         
+        // === Slider Activation Logic Replaced with Swiper.js ===
+        let mainSlider = null;
         function activateSlider() {
             const container = document.querySelector('.slider-container');
             if (!container || container.classList.contains('slider-active')) return;
-            const wrapper = container.querySelector('.slider-wrapper');
-            let slides = Array.from(wrapper.children);
-            if (slides.length <= 1) return;
-            let currentIndex = 1;
-            wrapper.appendChild(slides[0].cloneNode(true));
-            wrapper.prepend(slides[slides.length - 1].cloneNode(true));
-            const setPosition = () => wrapper.style.transform = `translateX(-${currentIndex * 100}%)`;
-            wrapper.style.transition = 'none'; setPosition();
-            const startAutoplay = () => {
-                setInterval(() => {
-                    currentIndex++;
-                    wrapper.style.transition = 'transform 0.7s ease-in-out';
-                    setPosition();
-                }, 5000);
-            };
-            wrapper.addEventListener('transitionend', () => {
-                slides = Array.from(wrapper.children);
-                if (currentIndex >= slides.length - 1) {
-                    wrapper.style.transition = 'none';
-                    currentIndex = 1;
-                    setPosition();
-                }
-                if (currentIndex <= 0) {
-                    wrapper.style.transition = 'none';
-                    currentIndex = slides.length - 2;
-                    setPosition();
-                }
+
+            mainSlider = new Swiper('.slider-container', {
+                loop: true,
+                autoplay: {
+                    delay: 4000,
+                    disableOnInteraction: false,
+                },
+                effect: 'fade',
+                fadeEffect: {
+                    crossFade: true
+                },
             });
-            startAutoplay();
             container.classList.add('slider-active');
         }
         
@@ -335,7 +323,9 @@
 
         function showView(viewId) {
             if (currentViewId !== viewId) { lastView = currentViewId; currentViewId = viewId; }
-            ['home-view', 'category-view', 'details-view', 'search-view', 'my-list-view'].forEach(id => {
+            
+            // === View IDs array updated to include new pages ===
+            ['home-view', 'category-view', 'details-view', 'search-view', 'my-list-view', 'bollywood-view', 'hollywood-view'].forEach(id => {
                 const element = document.getElementById(id);
                 if(element) element.style.display = (id === viewId) ? (id === 'search-view' ? 'flex' : 'block') : 'none';
             });
@@ -374,11 +364,37 @@
             myListView.innerHTML = `<h2 class="section-title">My List</h2><section class="manga-list">${myListItems.map(createMyListItem).join('')}</section>`;
         }
 
+        // === NEW FUNCTIONS TO RENDER BOLLYWOOD AND HOLLYWOOD PAGES ===
+        function renderBollywoodPage() {
+            const bollywoodView = document.getElementById('bollywood-view');
+            if (!bollywoodView) return;
+            const bollywoodMovies = allMoviesData.filter(movie => movie.category === 'Bollywood');
+            if (bollywoodMovies.length > 0) {
+                bollywoodView.innerHTML = `<h2 class="section-title">Bollywood</h2><section class="manga-list">${bollywoodMovies.map(createDetailedListItem).join('')}</section>`;
+            } else {
+                bollywoodView.innerHTML = `<h2 class="section-title">Bollywood</h2><p>No Bollywood movies found.</p>`;
+            }
+        }
+
+        function renderHollywoodPage() {
+            const hollywoodView = document.getElementById('hollywood-view');
+            if (!hollywoodView) return;
+            const hollywoodMovies = allMoviesData.filter(movie => movie.category === 'Hollywood');
+            if (hollywoodMovies.length > 0) {
+                hollywoodView.innerHTML = `<h2 class="section-title">Hollywood</h2><section class="manga-list">${hollywoodMovies.map(createDetailedListItem).join('')}</section>`;
+            } else {
+                hollywoodView.innerHTML = `<h2 class="section-title">Hollywood</h2><p>No Hollywood movies found.</p>`;
+            }
+        }
+
+        // === Logic to render current view updated ===
         function renderCurrentView() {
             switch (currentViewId) {
                 case 'home-view': renderHomePage(); break;
                 case 'category-view': document.getElementById('category-view').innerHTML = `<h2 class="section-title">All Movies</h2><section class="manga-list">${(allMoviesData.length > 0 ? allMoviesData : []).map(createDetailedListItem).join('')}</section>`; break;
                 case 'my-list-view': renderMyListPage(); break;
+                case 'bollywood-view': renderBollywoodPage(); break;
+                case 'hollywood-view': renderHollywoodPage(); break;
                 case 'search-view': document.getElementById('search-page-input').value = ''; handleLiveSearch(); break;
             }
         }
@@ -428,4 +444,4 @@
         window.handleMyListItemClick = handleMyListItemClick; window.showLoadingAndRedirect = showLoadingAndRedirect;
     </script>
 </body>
-</html>
+    </html>
