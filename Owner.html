@@ -26,7 +26,7 @@
         header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         header h1 { font-size: 28px; color: var(--primary); }
         .btn-back { font-size: 28px; background: none; border: none; color: var(--text-primary); padding-right: 15px; }
-        .list-section { background-color: var(--secondary); padding: 20px; border-radius: 8px; }
+        .list-section { background-color: var(--secondary); padding: 20px; border-radius: 8px; margin-bottom: 30px;}
         .list-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; border-radius: 4px; }
         .list-item:nth-child(even) { background-color: #2a2a2a; }
         .list-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%; }
@@ -43,7 +43,7 @@
         #form-view .form-header, #popular-form-view .form-header, #logo-form-view .form-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         #form-view h2, #popular-form-view h2, #logo-form-view h2 { font-size: 24px; }
         #form-view .btn-close-form, #popular-form-view .btn-close-form, #logo-form-view .btn-close-form { font-size: 28px; background: none; border: none; color: var(--text-primary); }
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 2000; }
         .modal.active { display: flex; }
         .modal-content { background: var(--secondary); padding: 25px; border-radius: 8px; width: 95%; max-width: 400px; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -51,7 +51,6 @@
         #add-choice-modal .choice-buttons { display: flex; flex-direction: column; gap: 15px; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 8px; font-weight: bold; }
-        /* === Style for Select Dropdown Added === */
         .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px; border-radius: 4px; border: 1px solid #444; background-color: #333; color: var(--text-primary); font-size: 16px; }
         .form-group textarea { resize: vertical; min-height: 100px; }
         .bottom-action-bar { position: fixed; bottom: 0; left: 0; width: 100%; background-color: var(--secondary); display: flex; justify-content: space-evenly; align-items: center; height: 60px; padding: 0 10px; box-shadow: 0 -2px 10px rgba(0,0,0,0.5); z-index: 500; }
@@ -59,7 +58,7 @@
         .bar-icon.active { color: var(--primary); }
         .bar-icon svg { width: 24px; height: 24px; }
         .fab { width: 56px; height: 56px; border-radius: 50%; background-color: var(--primary); color: white; font-size: 28px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.4); position: fixed; bottom: 75px; left: 50%; transform: translateX(-50%); z-index: 501; }
-        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .color-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 15px; padding: 20px; }
         .color-swatch { width: 100%; aspect-ratio: 1/1; border-radius: 50%; cursor: pointer; border: 2px solid #555; transition: transform 0.2s, box-shadow 0.2s; }
@@ -70,6 +69,7 @@
 
         #toast-notification { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background-color: #333; color: white; padding: 12px 20px; border-radius: 8px; z-index: 9999; opacity: 0; visibility: hidden; transition: opacity 0.4s, visibility 0.4s, bottom 0.4s; font-size: 14px; font-weight: 500; border: 1px solid var(--primary); }
         #toast-notification.show { opacity: 1; visibility: visible; bottom: 100px; }
+        .btn-change { background-color: #555; color: #fff; padding: 6px 12px; font-size: 14px; width: auto; }
     </style>
 </head>
 <body>
@@ -83,8 +83,25 @@
     <div id="logo-form-view" class="view"><div class="container"><header><button class="btn-back" onclick="switchView(lastActiveView)">&lt;</button><h1>Change Logo</h1><div></div></header><form id="logo-form"><div class="form-group"><label for="logoUrlInput">Logo Image URL</label><input type="url" id="logoUrlInput" placeholder="https://example.com/logo.png"></div><button type="submit" class="btn-primary">Save Logo</button><button type="button" class="btn-secondary" onclick="resetLogo()">Reset to Default</button></form></div></div>
     
     <div id="website-name-view" class="view"><div class="container"><header><button class="btn-back" onclick="switchView(lastActiveView)">&lt;</button><h1>Change Website Name</h1><div></div></header><form id="website-name-form"><div class="form-group"><label for="websiteNameInput">Website Name</label><input type="text" id="websiteNameInput" placeholder="Enter new name" required></div><button type="submit" class="btn-primary">Save Change</button><button type="button" class="btn-secondary" onclick="resetWebsiteName()">Reset to Default</button></form></div></div>
+
+    <div id="item-settings-view" class="view">
+        <div class="container">
+            <header>
+                <button class="btn-back" onclick="switchView(lastActiveView)">&lt;</button>
+                <h1>Change Button Text</h1>
+                <div></div>
+            </header>
+            <h2>Banners</h2>
+            <div class="list-section" id="banner-settings-list"></div>
+            <h2>Movies</h2>
+            <div class="list-section" id="movie-settings-list"></div>
+            <h2>Updates</h2>
+            <div class="list-section" id="update-settings-list"></div>
+            <h2>Popular Cards</h2>
+            <div class="list-section" id="popular-settings-list"></div>
+        </div>
+    </div>
     
-    <!-- === Main Form Updated with Category Field === -->
     <div id="form-view" class="view"><div class="form-container container"><div class="form-header"><h2 id="form-title"></h2><button class="btn-close-form" onclick="switchView(lastActiveView)">×</button></div><form id="main-form"><input type="hidden" id="docId"><input type="hidden" id="collectionName"><div class="form-group" data-field="title"><label for="title">Title</label><input type="text" id="title" required></div><div class="form-group" data-field="imageUrl"><label for="imageUrl">Image URL</label><input type="url" id="imageUrl" required></div><div class="form-group" data-field="description"><label for="description">Description</label><textarea id="description"></textarea></div><div class="form-group" data-field="language"><label for="language">Language</label><input type="text" id="language"></div>
         <div class="form-group" data-field="category">
             <label for="category">Category</label>
@@ -96,26 +113,28 @@
         </div>
         <div class="form-group" data-field="telegramLink"><label for="telegramLink">Telegram Channel Link</label><input type="url" id="telegramLink"></div><button type="submit" class="btn-primary" style="margin-top: 20px;">Save</button></form></div></div>
     
-    <div id="popular-form-view" class="view">
-        <div class="form-container container">
-            <div class="form-header">
-                <h2 id="popular-form-title">Add Popular Card</h2>
-                <button class="btn-close-form" onclick="switchView('popular-view')">×</button>
+    <div id="popular-form-view" class="view"><div class="form-container container"><div class="form-header"><h2 id="popular-form-title">Add Popular Card</h2><button class="btn-close-form" onclick="switchView('popular-view')">×</button></div><form id="popular-form"><input type="hidden" id="popular-docId"><div class="form-group"><label for="popular-title">Title</label><input type="text" id="popular-title" required></div><div class="form-group"><label for="popular-imageUrl">Image URL</label><input type="url" id="popular-imageUrl" required></div><div class="form-group"><label for="popular-description">Description</label><textarea id="popular-description"></textarea></div><div class="form-group"><label for="popular-language">Language</label><input type="text" id="popular-language"></div><div class="form-group"><label for="popular-telegramLink">Telegram Channel Link</label><input type="url" id="popular-telegramLink"></div><button type="submit" class="btn-primary" style="margin-top: 20px;">Save Popular Card</button></form></div></div>
+
+    <div id="add-choice-modal" class="modal"><div class="modal-content"><div class="modal-header"><h2>Options</h2><button class="close-btn" onclick="hideAddChoice()">×</button></div><div class="choice-buttons"><button class="btn-primary" onclick="openForm('banners', 'add')">Add Banner</button><button class="btn-primary" onclick="openForm('movies', 'add')">Add Movie</button><button class="btn-primary" onclick="openForm('updates', 'add')">Add Update</button><button class="btn-primary" onclick="openPopularForm('add')">Add Popular Card</button><hr>
+    <button class="btn-secondary" onclick="showNameChangeForm()">Change Website Name</button><button class="btn-secondary" onclick="showColorPicker()">Change Website Color</button><button class="btn-secondary" onclick="showBackgroundForm()">Change Background</button><button class="btn-secondary" onclick="showLogoForm()">Change Logo</button><button class="btn-secondary" onclick="showItemSettings()">सेटिंग्स</button></div></div></div>
+
+    <div id="button-text-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="button-text-modal-title">Edit Button Text</h2>
+                <button class="close-btn" onclick="closeButtonTextEditor()">×</button>
             </div>
-            <form id="popular-form">
-                <input type="hidden" id="popular-docId">
-                <div class="form-group"><label for="popular-title">Title</label><input type="text" id="popular-title" required></div>
-                <div class="form-group"><label for="popular-imageUrl">Image URL</label><input type="url" id="popular-imageUrl" required></div>
-                <div class="form-group"><label for="popular-description">Description</label><textarea id="popular-description"></textarea></div>
-                <div class="form-group"><label for="popular-language">Language</label><input type="text" id="popular-language"></div>
-                <div class="form-group"><label for="popular-telegramLink">Telegram Channel Link</label><input type="url" id="popular-telegramLink"></div>
-                <button type="submit" class="btn-primary" style="margin-top: 20px;">Save Popular Card</button>
+            <form id="button-text-form">
+                <input type="hidden" id="button-text-docId">
+                <input type="hidden" id="button-text-collectionName">
+                <div class="form-group">
+                    <label for="watchNowTextInput">Watch Now Button Text</label>
+                    <input type="text" id="watchNowTextInput" required>
+                </div>
+                <button type="submit" class="btn-primary">Save Text</button>
             </form>
         </div>
     </div>
-
-    <div id="add-choice-modal" class="modal"><div class="modal-content"><div class="modal-header"><h2>Options</h2><button class="close-btn" onclick="hideAddChoice()">×</button></div><div class="choice-buttons"><button class="btn-primary" onclick="openForm('banners', 'add')">Add Banner</button><button class="btn-primary" onclick="openForm('movies', 'add')">Add Movie</button><button class="btn-primary" onclick="openForm('updates', 'add')">Add Update</button><button class="btn-primary" onclick="openPopularForm('add')">Add Popular Card</button><hr>
-    <button class="btn-secondary" onclick="showNameChangeForm()">Change Website Name</button><button class="btn-secondary" onclick="showColorPicker()">Change Website Color</button><button class="btn-secondary" onclick="showBackgroundForm()">Change Background</button><button class="btn-secondary" onclick="showLogoForm()">Change Logo</button></div></div></div>
 
     <nav class="bottom-action-bar"><button id="nav-banners" class="bar-icon active" onclick="switchView('banners-view')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg><span>Banners</span></button><button id="nav-movies" class="bar-icon" onclick="switchView('movies-view')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg><span>Movies</span></button><button class="fab" onclick="showAddChoice()">+</button><button id="nav-updates" class="bar-icon" onclick="switchView('updates-view')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12h2.5"/><path d="M19.5 7.5c-1.342-2.13-3.42-3.5-5.5-3.5-3.038 0-6.5 2.462-6.5 5.5s3.462 6.5 6.5 6.5c2.08 0 4.158-1.37 5.5-3.5"/><path d="M12.5 8H12v6h6"/></svg><span>Updates</span></button><button id="nav-popular" class="bar-icon" onclick="switchView('popular-view')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg><span>Popular</span></button></nav>
     
@@ -156,7 +175,6 @@
             }
         }
         
-        // === collectionFields Updated for 'movies' ===
         const collectionFields = {
             'banners': ['title', 'imageUrl', 'description', 'telegramLink'],
             'movies': ['title', 'imageUrl', 'description', 'language', 'category', 'telegramLink'],
@@ -168,18 +186,14 @@
             mainForm.reset();
             document.getElementById('docId').value = docId;
             document.getElementById('collectionName').value = collection;
-
             const collectionNameSingular = collection.endsWith('s') ? collection.slice(0, -1) : collection;
             const formTitle = `${mode === 'edit' ? 'Edit' : 'Add'} ${collectionNameSingular.charAt(0).toUpperCase() + collectionNameSingular.slice(1)}`;
             document.getElementById('form-title').innerText = formTitle;
-            
             const visibleFields = collectionFields[collection] || [];
             document.querySelectorAll('#main-form .form-group').forEach(group => {
                 group.style.display = visibleFields.includes(group.dataset.field) ? 'block' : 'none';
             });
-            
             switchView('form-view');
-
             if (mode === 'edit' && docId) {
                 try {
                     const doc = await db.collection(collection).doc(docId).get();
@@ -189,13 +203,8 @@
                             const input = document.getElementById(field);
                             if(input) input.value = data[field] || '';
                         });
-                    } else {
-                        alert("Error: Document not found.");
-                    }
-                } catch (err) {
-                    alert("Could not load item data. Check Firestore rules.");
-                    console.error("Error fetching document:", err);
-                }
+                    } else { alert("Error: Document not found."); }
+                } catch (err) { alert("Could not load item data. Check Firestore rules."); console.error("Error fetching document:", err); }
             }
         }
 
@@ -203,42 +212,26 @@
             e.preventDefault();
             const collection = document.getElementById('collectionName').value;
             const docId = document.getElementById('docId').value;
-            
             const data = { timestamp: firebase.firestore.FieldValue.serverTimestamp() };
             const fields = collectionFields[collection] || [];
             fields.forEach(field => {
                 const input = document.getElementById(field);
                 if(input) data[field] = input.value;
             });
-
             try {
-                if (docId) { 
-                    await db.collection(collection).doc(docId).set(data, { merge: true }); 
-                    showToast('Update successful!');
-                } else { 
-                    await db.collection(collection).add(data); 
-                    showToast('Item added successfully!');
-                }
+                if (docId) { await db.collection(collection).doc(docId).set(data, { merge: true }); showToast('Update successful!'); } 
+                else { await db.collection(collection).add(data); showToast('Item added successfully!'); }
                 switchView(lastActiveView);
                 fetchAllData();
-            } catch (err) { 
-                alert("Could not save data. Check Firestore rules. Error: " + err.message); 
-            }
+            } catch (err) { alert("Could not save data. Check Firestore rules. Error: " + err.message); }
         });
 
         async function openPopularForm(mode = 'add', docId = null) {
             hideAddChoice();
             popularForm.reset();
             document.getElementById('popular-docId').value = docId || '';
-
-            if (mode === 'add') {
-                document.getElementById('popular-form-title').innerText = 'Add Popular Card';
-            } else {
-                document.getElementById('popular-form-title').innerText = 'Edit Popular Card';
-            }
-            
+            document.getElementById('popular-form-title').innerText = mode === 'add' ? 'Add Popular Card' : 'Edit Popular Card';
             switchView('popular-form-view');
-
             if (mode === 'edit' && docId) {
                 try {
                     const doc = await db.collection('popular').doc(docId).get();
@@ -249,13 +242,8 @@
                         document.getElementById('popular-description').value = data.description || '';
                         document.getElementById('popular-language').value = data.language || '';
                         document.getElementById('popular-telegramLink').value = data.telegramLink || '';
-                    } else {
-                         alert("Error: Document not found.");
-                    }
-                } catch (err) {
-                    alert("Could not load item data. Check Firestore rules.");
-                    console.error("Error fetching popular doc:", err);
-                }
+                    } else { alert("Error: Document not found."); }
+                } catch (err) { alert("Could not load item data. Check Firestore rules."); console.error("Error fetching popular doc:", err); }
             }
         }
 
@@ -271,17 +259,12 @@
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
             try {
-                if (docId) {
-                    await db.collection('popular').doc(docId).set(data, { merge: true });
-                } else {
-                    await db.collection('popular').add(data);
-                }
+                if (docId) { await db.collection('popular').doc(docId).set(data, { merge: true }); } 
+                else { await db.collection('popular').add(data); }
                 showToast('Popular Card saved successfully!');
                 switchView('popular-view');
                 fetchPopularData();
-            } catch (err) {
-                alert('Error saving data. Check Firestore rules. Error: ' + err.message);
-            }
+            } catch (err) { alert('Error saving data. Check Firestore rules. Error: ' + err.message); }
         });
 
         function showAddChoice() { document.getElementById('add-choice-modal').classList.add('active'); }
@@ -289,20 +272,14 @@
         
         const colors = [ "#00BFFF", "#E50914", "#F44336", "#E91E63", "#9C27B0", "#673AB7", "#3F51B5", "#2196F3", "#00BCD4", "#009688", "#4CAF50", "#FFC107", "#FF9800", "#FF5722", "#795548", "#607D8B", "#FFFFFF" ];
         const colorGrid = document.getElementById('color-grid');
-        colors.forEach(color => {
-            const swatch = document.createElement('div'); swatch.className = 'color-swatch'; swatch.style.backgroundColor = color; swatch.onclick = () => selectColor(color); colorGrid.appendChild(swatch);
-        });
-
+        colors.forEach(color => { const swatch = document.createElement('div'); swatch.className = 'color-swatch'; swatch.style.backgroundColor = color; swatch.onclick = () => selectColor(color); colorGrid.appendChild(swatch); });
+        
         async function showNameChangeForm() { hideAddChoice(); try { const doc = await db.collection('siteConfig').doc('main').get(); if (doc.exists && doc.data().websiteName) { document.getElementById('websiteNameInput').value = doc.data().websiteName; } else { document.getElementById('websiteNameInput').value = 'Fire Box TV'; } } catch (err) { console.error("Error fetching website name:", err); } switchView('website-name-view'); }
         document.getElementById('website-name-form').addEventListener('submit', async (e) => { e.preventDefault(); const newName = document.getElementById('websiteNameInput').value.trim(); if (!newName) { return; } try { await db.collection('siteConfig').doc('main').set({ websiteName: newName }, { merge: true }); showToast('Website name updated!'); switchView(lastActiveView); } catch (err) { alert('Error updating name: ' + err.message); } });
         async function resetWebsiteName() { if (confirm("Are you sure you want to reset the name to 'Fire Box TV'?")) { try { await db.collection('siteConfig').doc('main').set({ websiteName: "Fire Box TV" }, { merge: true }); document.getElementById('websiteNameInput').value = "Fire Box TV"; showToast('Website name has been reset.'); switchView(lastActiveView); } catch (err) { alert('Error resetting name: ' + err.message); } } }
         
         function showColorPicker() { hideAddChoice(); switchView('color-picker-view'); }
-        async function selectColor(hexCode) { 
-            applyThemeColor(hexCode); 
-            showToast('Change Successful!');
-            await db.collection('siteConfig').doc('main').set({ primaryColor: hexCode }, { merge: true });
-        }
+        async function selectColor(hexCode) { applyThemeColor(hexCode); showToast('Change Successful!'); await db.collection('siteConfig').doc('main').set({ primaryColor: hexCode }, { merge: true }); }
         
         async function showBackgroundForm() { hideAddChoice(); try { const doc = await db.collection('siteConfig').doc('main').get(); if (doc.exists) { document.getElementById('backgroundUrlInput').value = doc.data().backgroundUrl || ''; } } catch (err) { console.error("Error fetching background URL:", err); } switchView('background-form-view'); }
         document.getElementById('background-form').addEventListener('submit', async (e) => { e.preventDefault(); const url = document.getElementById('backgroundUrlInput').value; try { await db.collection('siteConfig').doc('main').set({ backgroundUrl: url }, { merge: true }); showToast('Background updated successfully!'); switchView(lastActiveView); } catch (err) { alert('Error updating background: ' + err.message); } });
@@ -312,25 +289,11 @@
         logoForm.addEventListener('submit', async (e) => { e.preventDefault(); const url = document.getElementById('logoUrlInput').value; try { await db.collection('siteConfig').doc('main').set({ logoUrl: url }, { merge: true }); showToast('Logo updated successfully!'); switchView(lastActiveView); } catch (err) { alert('Error updating logo: ' + err.message); } });
         async function resetLogo() { if (confirm("Are you sure you want to reset the logo?")) { try { await db.collection('siteConfig').doc('main').set({ logoUrl: "" }, { merge: true }); document.getElementById('logoUrlInput').value = ""; showToast('Logo has been reset.'); switchView(lastActiveView); } catch (err) { alert('Error resetting logo: ' + err.message); } } }
 
-        function showToast(message) {
-            const toast = document.getElementById('toast-notification');
-            if (!toast) return;
-            toast.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => { toast.classList.remove('show'); }, 2500);
-        }
-
+        function showToast(message) { const toast = document.getElementById('toast-notification'); if (!toast) return; toast.textContent = message; toast.classList.add('show'); setTimeout(() => { toast.classList.remove('show'); }, 2500); }
         function applyThemeColor(hexCode) { if (hexCode) document.documentElement.style.setProperty('--primary', hexCode); }
         async function fetchSiteConfig() { try { const doc = await db.collection('siteConfig').doc('main').get(); if (doc.exists) { applyThemeColor(doc.data().primaryColor); } } catch (err) { console.error("Error fetching site config:", err); } }
         
-        function filterGeneric(inputId, listId) {
-            const filter = document.getElementById(inputId).value.toLowerCase();
-            const items = document.getElementById(listId).getElementsByClassName('list-item');
-            Array.from(items).forEach(item => {
-                const txtValue = item.querySelector("span").textContent || item.querySelector("span").innerText;
-                item.style.display = txtValue.toLowerCase().indexOf(filter) > -1 ? "flex" : "none";
-            });
-        }
+        function filterGeneric(inputId, listId) { const filter = document.getElementById(inputId).value.toLowerCase(); const items = document.getElementById(listId).getElementsByClassName('list-item'); Array.from(items).forEach(item => { const txtValue = item.querySelector("span").textContent || item.querySelector("span").innerText; item.style.display = txtValue.toLowerCase().indexOf(filter) > -1 ? "flex" : "none"; }); }
         function filterMovies() { filterGeneric('movieSearchInput', 'movies-list'); }
         function filterPopular() { filterGeneric('popularSearchInput', 'popular-list'); }
         function filterBanners() { filterGeneric('bannerSearchInput', 'banners-list'); }
@@ -349,11 +312,84 @@
                 }).join('');
             } catch (e) { console.error(e); listEl.innerHTML = `<p>Error loading data.</p>`; }
         }
-
         function fetchPopularData() { fetchCollectionData('popular', 'openPopularForm'); }
-
         async function deleteDoc(collection, docId, title) { if (confirm(`Delete "${title}"?`)) { await db.collection(collection).doc(docId).delete(); showToast('Successfully Deleted!'); fetchAllData(); } }
         
+        function showItemSettings() {
+            hideAddChoice();
+            switchView('item-settings-view');
+            renderSettingsList('banners');
+            renderSettingsList('movies');
+            renderSettingsList('updates');
+            renderSettingsList('popular');
+        }
+
+        async function renderSettingsList(collectionName) {
+            // === BUG FIX is HERE ===
+            const singularName = collectionName === 'banners' ? 'banner' : collectionName.replace(/s$/, '');
+            const listEl = document.getElementById(`${singularName}-settings-list`);
+            // =======================
+
+            if (!listEl) {
+                console.error(`Element not found for ${collectionName}`);
+                return;
+            }
+
+            listEl.innerHTML = '<div class="spinner"></div>';
+            try {
+                const snapshot = await db.collection(collectionName).orderBy("timestamp", "desc").get();
+                if (snapshot.empty) {
+                    listEl.innerHTML = `<p>No items found in ${collectionName}.</p>`;
+                    return;
+                }
+                listEl.innerHTML = snapshot.docs.map(doc => {
+                    const d = doc.data();
+                    const title = d.title || 'No Title';
+                    const watchNowText = d.watchNowButtonText || '';
+                    const escapedTitle = title.replace(/'/g, "\\'");
+                    
+                    return `<div class="list-item">
+                                <span>${title}</span>
+                                <div class="list-item-actions">
+                                    <button class="btn-change" onclick="openButtonTextEditor('${collectionName}', '${doc.id}', '${escapedTitle}', '${watchNowText.replace(/'/g, "\\'")}')">Change</button>
+                                </div>
+                            </div>`;
+                }).join('');
+            } catch (e) {
+                console.error(`Error loading ${collectionName} for settings:`, e);
+                listEl.innerHTML = `<p>Error loading data.</p>`;
+            }
+        }
+
+        function openButtonTextEditor(collection, docId, title, currentWatchNow) {
+            document.getElementById('button-text-docId').value = docId;
+            document.getElementById('button-text-collectionName').value = collection;
+            document.getElementById('button-text-modal-title').innerText = `Edit: ${title}`;
+            document.getElementById('watchNowTextInput').value = currentWatchNow || 'Watch Now';
+            document.getElementById('button-text-modal').classList.add('active');
+        }
+
+        function closeButtonTextEditor() {
+            document.getElementById('button-text-modal').classList.remove('active');
+        }
+
+        document.getElementById('button-text-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const docId = document.getElementById('button-text-docId').value;
+            const collection = document.getElementById('button-text-collectionName').value;
+            const data = {
+                watchNowButtonText: document.getElementById('watchNowTextInput').value.trim()
+            };
+            try {
+                await db.collection(collection).doc(docId).set(data, { merge: true });
+                showToast('Button text updated successfully!');
+                closeButtonTextEditor();
+                renderSettingsList(collection);
+            } catch (err) {
+                alert('Error updating button text: ' + err.message);
+            }
+        });
+
         function fetchAllData() { 
             fetchSiteConfig(); 
             fetchCollectionData('banners', 'openForm'); 
@@ -366,14 +402,16 @@
         window.deleteDoc = deleteDoc; 
         window.filterMovies = filterMovies; window.filterPopular = filterPopular; window.filterBanners = filterBanners; window.filterUpdates = filterUpdates;
         window.showAddChoice = showAddChoice; window.hideAddChoice = hideAddChoice; 
-        
         window.showNameChangeForm = showNameChangeForm; window.resetWebsiteName = resetWebsiteName;
         window.showColorPicker = showColorPicker; window.selectColor = selectColor;
         window.showBackgroundForm = showBackgroundForm; window.resetBackground = resetBackground;
         window.showLogoForm = showLogoForm; window.resetLogo = resetLogo;
         window.openPopularForm = openPopularForm;
+        window.showItemSettings = showItemSettings;
+        window.openButtonTextEditor = openButtonTextEditor;
+        window.closeButtonTextEditor = closeButtonTextEditor;
 
         fetchAllData();
     </script>
 </body>
-                                                                                                                                                                                                                                          </html>
+   </html>
