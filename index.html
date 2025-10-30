@@ -77,7 +77,6 @@
         .list-item-title { font-size: 13px; font-weight: 500; color: var(--text-primary); line-height: 1.3; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
         .list-item-meta { display: -webkit-box; font-size: 11px; color: var(--text-secondary); line-height: 1.4; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         
-        /* === Details Page Styles Reverted and Updated === */
         #details-view { padding: 15px; }
         .details-header { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
         .details-header h1 { font-size: 22px; flex-grow: 1; }
@@ -86,7 +85,7 @@
         .download-btn { background-color: var(--primary-color); }
         .add-list-details-btn { background: rgba(40, 40, 40, 0.8); border: 1px solid var(--text-secondary); }
         .details-poster { width: 150px; display: block; margin: 0 auto 20px; border-radius: 8px; }
-        .details-description { color: var(--text-secondary); line-height: 1.7; white-space: pre-wrap; /* This is the fix for line breaks */ }
+        .details-description { color: var(--text-secondary); line-height: 1.7; white-space: pre-wrap; }
 
         .back-link { display: inline-block; color: var(--primary-color); text-decoration: none; margin-bottom: 20px; font-weight: bold; }
         #search-view { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background-color: var(--background-color); z-index: 1000; display: none; flex-direction: column; }
@@ -116,6 +115,31 @@
         .modal-btn.delete { background-color: var(--primary-color); }
         .modal-btn.back { background-color: #555; }
         #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); display: flex; justify-content: center; align-items: center; z-index: 10000; color: white; font-size: 24px; font-weight: bold; }
+        
+        /* Info Page Styles */
+        #info-view h2 {
+            font-size: 22px;
+            color: var(--primary-color);
+            margin-top: 25px;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        #info-view p {
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            white-space: pre-wrap; /* Ensures line breaks are respected */
+        }
+        #info-view .footer-text {
+            text-align: center;
+            margin-top: 30px;
+            padding-bottom: 20px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
     </style>
 </head>
 <body>
@@ -143,6 +167,7 @@
                 <li><a onclick="showView('my-list-view')">My List</a></li>
                 <li><a onclick="showView('bollywood-view')">Bollywood</a></li>
                 <li><a onclick="showView('hollywood-view')">Hollywood</a></li>
+                <li><a onclick="showView('info-view')" style="color: red; font-weight: bold;">Info</a></li>
             </ul>
         </nav>
 
@@ -150,10 +175,9 @@
             <main id="home-view" class="container"></main>
             <main id="category-view" class="container" style="display: none;"></main>
             <main id="my-list-view" class="container" style="display: none;"></main>
-            
             <main id="bollywood-view" class="container" style="display: none;"></main>
             <main id="hollywood-view" class="container" style="display: none;"></main>
-
+            <main id="info-view" class="container" style="display: none;"></main>
             <main id="details-view" class="container" style="display: none;"></main>
         </div>
         <div id="search-view" style="display: none;">
@@ -339,7 +363,7 @@
         function showView(viewId) {
             if (currentViewId !== viewId) { lastView = currentViewId; currentViewId = viewId; }
             
-            ['home-view', 'category-view', 'details-view', 'search-view', 'my-list-view', 'bollywood-view', 'hollywood-view'].forEach(id => {
+            ['home-view', 'category-view', 'details-view', 'search-view', 'my-list-view', 'bollywood-view', 'hollywood-view', 'info-view'].forEach(id => {
                 const element = document.getElementById(id);
                 if(element) element.style.display = (id === viewId) ? (id === 'search-view' ? 'flex' : 'block') : 'none';
             });
@@ -347,7 +371,6 @@
             renderCurrentView(); window.scrollTo(0, 0);
         }
         
-        // === Reverted and fixed showDetailsPage function ===
         function showDetailsPage(itemId, type) {
             const allData = [...allMoviesData, ...allBannersData, ...allUpdatesData, ...allPopularData];
             const item = allData.find(m => m.id == itemId);
@@ -412,6 +435,49 @@
             }
         }
 
+        function renderInfoPage() {
+            const infoView = document.getElementById('info-view');
+            if (!infoView) return;
+            infoView.innerHTML = `
+                <h2>🔥 DMCA Policy – Fire Box TV</h2>
+                <p>Fire Box TV fully respects the intellectual property rights of content creators, studios, and copyright owners. In accordance with the Digital Millennium Copyright Act (DMCA), we respond promptly to valid takedown requests and aim to ensure full compliance with copyright law.</p>
+                <p>Fire Box TV does not host or distribute any copyrighted videos, files, or streaming links on its servers. Our platform is strictly for informational and promotional purposes, showcasing only movie and series posters, titles, ratings, and general details that are already publicly available on the internet.</p>
+                <p>All posters and information featured on Fire Box TV are used for illustrative and educational purposes under the principles of fair use. We do not claim ownership of any images or logos; all copyrights belong to their respective owners.</p>
+                <p>If you are a copyright owner or an authorized representative and believe that any material on Fire Box TV infringes upon your rights, you can submit a DMCA notice. Please include the following information in your request:</p>
+                <p>1. Your full name, company (if applicable), and electronic or physical signature.<br>
+                   2. A detailed description of the copyrighted work you believe has been infringed.<br>
+                   3. The exact URL or page where the material appears on our website.<br>
+                   4. Your contact details (email address, phone number, or mailing address).<br>
+                   5. A statement affirming your good-faith belief that the material’s use is not authorized by the copyright owner or the law.<br>
+                   6. A statement, under penalty of perjury, that the information provided in your notice is accurate and that you are authorized to act on behalf of the copyright owner.</p>
+                <p>Once we receive a valid DMCA notice, the content in question will be reviewed and removed as soon as possible if necessary.</p>
+                <p>Fire Box TV supports the creative industry and encourages users to watch and support official releases through legitimate platforms.</p>
+                
+                <h2>⚖️ Terms of Use – Fire Box TV</h2>
+                <p>Welcome to Fire Box TV! By accessing or using our website, you agree to follow the Terms and Conditions stated below. Please read them carefully before using the site.</p>
+                <p><b>1. General Information</b><br>Fire Box TV is an entertainment-based informational website that shares movie and series posters, ratings, updates, and general details available from public sources. We do not host, upload, or stream any copyrighted videos, download links, or files on our servers.</p>
+                <p><b>2. Use of Content</b><br>All posters, titles, and information on Fire Box TV are provided for informational and promotional purposes only. You may view and share the content for personal, non-commercial use, but you may not copy, modify, or redistribute any material without permission from the respective copyright owners.</p>
+                <p><b>3. Copyright Disclaimer</b><br>Fire Box TV respects the rights of creators and studios. All images, posters, and logos belong to their respective copyright owners. If you believe any content violates your rights, please contact us through our DMCA page or contact email for prompt removal.</p>
+                <p><b>4. External Links</b><br>Fire Box TV may include references or names of third-party services (like streaming platforms), but we do not provide or endorse any external download or streaming links. We are not responsible for the content or policies of third-party websites.</p>
+                <p><b>5. User Conduct</b><br>Users agree not to misuse the website by uploading, promoting, or sharing illegal content through comments, forms, or any interactive features. Any misuse may result in access restriction or removal of user-submitted content.</p>
+                <p><b>6. Limitation of Liability</b><br>Fire Box TV provides information “as is” without any warranties. We are not liable for any loss, damage, or issue arising from the use or interpretation of the information provided on our site.</p>
+                <p><b>7. Changes to Terms</b><br>We reserve the right to modify or update these Terms at any time without prior notice. Continued use of the site after such changes will mean you accept the revised terms.</p>
+
+                <h2>📬 Contact – Fire Box TV</h2>
+                <p>Thank you for visiting Fire Box TV! We value your feedback, suggestions, and inquiries. Please feel free to contact us for any of the following reasons:</p>
+                <p>💡 To share feedback or suggestions about our website.<br>
+                   📸 To request the removal of any poster or image that may infringe copyright.<br>
+                   📢 For general inquiries, partnership ideas, or collaborations.</p>
+                <p><b>📧 Contact Username</b><br>[@Empire_7860]</p>
+                <p>You can reach us anytime, and we will do our best to respond as soon as possible. Please include clear details in your message — such as the page link or content title — to help us assist you faster.</p>
+
+                <h2>🔥 About Fire Box TV</h2>
+                <p>Fire Box TV is your one-stop hub for the latest movies, web series, and TV show updates.\nWe only share high-quality posters, details, and ratings — no videos or links.\nStay informed, stay entertained — only on Fire Box TV!</p>
+
+                <p class="footer-text">© 2025 Fire Box TV All Rights Reserved</p>
+            `;
+        }
+
         function renderCurrentView() {
             switch (currentViewId) {
                 case 'home-view': renderHomePage(); break;
@@ -419,6 +485,7 @@
                 case 'my-list-view': renderMyListPage(); break;
                 case 'bollywood-view': renderBollywoodPage(); break;
                 case 'hollywood-view': renderHollywoodPage(); break;
+                case 'info-view': renderInfoPage(); break;
                 case 'search-view': document.getElementById('search-page-input').value = ''; handleLiveSearch(); break;
             }
         }
@@ -468,4 +535,4 @@
         window.handleMyListItemClick = handleMyListItemClick; window.showLoadingAndRedirect = showLoadingAndRedirect;
     </script>
 </body>
-     </html>
+    </html>
