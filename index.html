@@ -116,6 +116,13 @@
         .modal-btn.back { background-color: #555; }
         #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); display: flex; justify-content: center; align-items: center; z-index: 10000; color: white; font-size: 24px; font-weight: bold; }
         
+        .category-banner {
+            width: 100%;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: block;
+        }
+
         #info-view h2 {
             font-size: 22px;
             color: var(--primary-color);
@@ -325,7 +332,10 @@
             const popularHTML = `<section><h2 class="section-title">Popular 🔥</h2><div class="horizontal-scroll-container">${(allPopularData.length > 0 ? allPopularData : []).map(createPopularCard).join('')}</div></section>`;
             const newReleasesHTML = `<section><h2 class="section-title">New Release 🚀</h2><div class="horizontal-scroll-container">${(allUpdatesData.length > 0 ? allUpdatesData : []).map(createReleaseCard).join('')}</div></section>`;
             
-            homeView.innerHTML = `${sliderHTML}${streamingHTML}${popularHTML}${newReleasesHTML}<h2 class="section-title">Latest Uploads</h2><section class="manga-list">${(allMoviesData.length > 0 ? allMoviesData : []).map(createDetailedListItem).join('')}</section>`;
+            // Filter movies for home page: only show movies without a specific category
+            const homePageMovies = allMoviesData.filter(movie => !movie.category);
+            
+            homeView.innerHTML = `${sliderHTML}${streamingHTML}${popularHTML}${newReleasesHTML}<h2 class="section-title">Latest Uploads</h2><section class="manga-list">${(homePageMovies.length > 0 ? homePageMovies : []).map(createDetailedListItem).join('')}</section>`;
             
             if (allBannersData.length > 0) activateSlider();
         }
@@ -406,51 +416,60 @@
         function renderMyListPage() {
             const myListView = document.getElementById('my-list-view');
             if(!myListView) return;
+            const myListBanner = `<img src="https://files.catbox.moe/f2z0c6.jpg" alt="My List Banner" class="category-banner">`;
             const myListIds = getMyList();
-            if (myListIds.length === 0) { myListView.innerHTML = `<h2 class="section-title">My List</h2><p>Your list is empty.</p>`; return; }
+            if (myListIds.length === 0) {
+                myListView.innerHTML = `${myListBanner}<h2 class="section-title">My List</h2><p>Your list is empty.</p>`;
+                return;
+            }
             const allData = [...allMoviesData, ...allBannersData, ...allUpdatesData, ...allPopularData];
             const uniqueData = allData.filter((item, index, self) => index === self.findIndex(t => t.id === item.id));
             const myListItems = myListIds.map(id => uniqueData.find(item => item.id === id)).filter(item => item);
-            myListView.innerHTML = `<h2 class="section-title">My List</h2><section class="manga-list">${myListItems.map(createMyListItem).join('')}</section>`;
+            myListView.innerHTML = `${myListBanner}<h2 class="section-title">My List</h2><section class="manga-list">${myListItems.map(createMyListItem).join('')}</section>`;
         }
 
         function renderBollywoodPage() {
             const bollywoodView = document.getElementById('bollywood-view');
             if (!bollywoodView) return;
+            const bollywoodBanner = `<img src="https://files.catbox.moe/zt1prf.jpg" alt="Bollywood Banner" class="category-banner">`;
             const bollywoodMovies = allMoviesData.filter(movie => movie.category === 'Bollywood');
             if (bollywoodMovies.length > 0) {
-                bollywoodView.innerHTML = `<h2 class="section-title">Bollywood</h2><section class="manga-list">${bollywoodMovies.map(createDetailedListItem).join('')}</section>`;
+                bollywoodView.innerHTML = `${bollywoodBanner}<h2 class="section-title">Bollywood</h2><section class="manga-list">${bollywoodMovies.map(createDetailedListItem).join('')}</section>`;
             } else {
-                bollywoodView.innerHTML = `<h2 class="section-title">Bollywood</h2><p>No Bollywood movies found.</p>`;
+                bollywoodView.innerHTML = `${bollywoodBanner}<h2 class="section-title">Bollywood</h2><p>No Bollywood movies found.</p>`;
             }
         }
 
         function renderHollywoodPage() {
             const hollywoodView = document.getElementById('hollywood-view');
             if (!hollywoodView) return;
+            const hollywoodBanner = `<img src="https://files.catbox.moe/21095g.jpg" alt="Hollywood Banner" class="category-banner">`;
             const hollywoodMovies = allMoviesData.filter(movie => movie.category === 'Hollywood');
             if (hollywoodMovies.length > 0) {
-                hollywoodView.innerHTML = `<h2 class="section-title">Hollywood</h2><section class="manga-list">${hollywoodMovies.map(createDetailedListItem).join('')}</section>`;
+                hollywoodView.innerHTML = `${hollywoodBanner}<h2 class="section-title">Hollywood</h2><section class="manga-list">${hollywoodMovies.map(createDetailedListItem).join('')}</section>`;
             } else {
-                hollywoodView.innerHTML = `<h2 class="section-title">Hollywood</h2><p>No Hollywood movies found.</p>`;
+                hollywoodView.innerHTML = `${hollywoodBanner}<h2 class="section-title">Hollywood</h2><p>No Hollywood movies found.</p>`;
             }
         }
         
         function renderKDramaPage() {
             const kdramaView = document.getElementById('kdrama-view');
             if (!kdramaView) return;
+            const kdramaBanner = `<img src="https://files.catbox.moe/mm8lhy.jpg" alt="K-Drama Banner" class="category-banner">`;
             const kdramaMovies = allMoviesData.filter(movie => movie.category === 'K-Drama');
             if (kdramaMovies.length > 0) {
-                kdramaView.innerHTML = `<h2 class="section-title">K-Drama</h2><section class="manga-list">${kdramaMovies.map(createDetailedListItem).join('')}</section>`;
+                kdramaView.innerHTML = `${kdramaBanner}<h2 class="section-title">K-Drama</h2><section class="manga-list">${kdramaMovies.map(createDetailedListItem).join('')}</section>`;
             } else {
-                kdramaView.innerHTML = `<h2 class="section-title">K-Drama</h2><p>No K-Drama movies found.</p>`;
+                kdramaView.innerHTML = `${kdramaBanner}<h2 class="section-title">K-Drama</h2><p>No K-Drama movies found.</p>`;
             }
         }
 
         function renderInfoPage() {
             const infoView = document.getElementById('info-view');
             if (!infoView) return;
+            const infoBanner = `<img src="https://files.catbox.moe/fuxfqo.jpg" alt="Info Banner" class="category-banner">`;
             infoView.innerHTML = `
+                ${infoBanner}
                 <h2>🔥 DMCA Policy – Fire Box TV</h2>
                 <p>Fire Box TV fully respects the intellectual property rights of content creators, studios, and copyright owners. In accordance with the Digital Millennium Copyright Act (DMCA), we respond promptly to valid takedown requests and aim to ensure full compliance with copyright law.</p>
                 <p>Fire Box TV does not host or distribute any copyrighted videos, files, or streaming links on its servers. Our platform is strictly for informational and promotional purposes, showcasing only movie and series posters, titles, ratings, and general details that are already publicly available on the internet.</p>
@@ -493,7 +512,10 @@
         function renderCurrentView() {
             switch (currentViewId) {
                 case 'home-view': renderHomePage(); break;
-                case 'category-view': document.getElementById('category-view').innerHTML = `<h2 class="section-title">All Movies</h2><section class="manga-list">${(allMoviesData.length > 0 ? allMoviesData : []).map(createDetailedListItem).join('')}</section>`; break;
+                case 'category-view': 
+                    const allMoviesBanner = `<img src="https://files.catbox.moe/g5q8g3.jpg" alt="All Movies Banner" class="category-banner">`;
+                    document.getElementById('category-view').innerHTML = `${allMoviesBanner}<h2 class="section-title">All Movies</h2><section class="manga-list">${(allMoviesData.length > 0 ? allMoviesData : []).map(createDetailedListItem).join('')}</section>`; 
+                    break;
                 case 'my-list-view': renderMyListPage(); break;
                 case 'bollywood-view': renderBollywoodPage(); break;
                 case 'hollywood-view': renderHollywoodPage(); break;
